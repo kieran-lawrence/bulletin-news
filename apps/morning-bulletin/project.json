@@ -1,0 +1,9 @@
+{
+  "name": "morning-bulletin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/morning-bulletin",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project morning-bulletin --web",
+  "targets": {}
+}
