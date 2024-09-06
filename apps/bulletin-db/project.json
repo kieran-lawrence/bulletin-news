@@ -1,0 +1,26 @@
+{
+    "name": "bulletin-db",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/bulletin-db/src",
+    "projectType": "application",
+    "tags": [],
+    "targets": {
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": ["build"],
+            "options": {
+                "buildTarget": "bulletin-db:build",
+                "runBuildTargetDependencies": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "bulletin-db:build:development"
+                },
+                "production": {
+                    "buildTarget": "bulletin-db:build:production"
+                }
+            }
+        }
+    }
+}
