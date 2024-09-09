@@ -1,10 +1,26 @@
 import { Module } from '@nestjs/common'
 import { ArticleModule } from './article/article.module'
 import { PublisherModule } from './publisher/publisher.module'
-import { CommentModule } from './comment/comment.module';
-
+import { TypeOrmModule } from '@nestjs/typeorm'
+import entities from '../util/typeorm'
+import { ConfigModule } from '@nestjs/config'
 @Module({
-    imports: [ArticleModule, PublisherModule, CommentModule],
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+        ArticleModule,
+        PublisherModule,
+        TypeOrmModule.forRoot({
+            type: 'postgres',
+            host: process.env.DB_HOST,
+            port: parseInt(process.env.DB_PORT),
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+            entities,
+            synchronize: true,
+            cache: true,
+        }),
+    ],
     controllers: [],
     providers: [],
 })
