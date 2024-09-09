@@ -1,6 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common'
+import { Routes } from '../../util/constants'
 
-@Controller('publisher')
+@Controller(Routes.PUBLISHER)
 export class PublisherController {
     @Get()
     findAll(): string {
@@ -15,15 +16,3 @@ export class PublisherController {
 interface GetPublisherByIdParams {
     id: string
 }
-
-// app.get('/publishers', (req, res) => {
-// 	res.send(publishers);
-// });
-// app.get('/comments', (req, res) => {
-// 	res.send(comments);
-// });
-// app.get('/publishers/:id', (req, res) => {
-// 	const { id } = req.params;
-// 	const publisher = publishers.find((p) => p.id === parseInt(id));
-// 	res.send(publisher);
-// });

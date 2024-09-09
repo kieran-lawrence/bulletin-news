@@ -1,36 +1,44 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import {
+    Body,
+    Controller,
+    Get,
+    Inject,
+    Param,
+    ParseIntPipe,
+    Post,
+} from '@nestjs/common'
+import { IArticleService } from './article'
+import { Article as ArticleType } from '../../util/types'
+import { Routes, Services } from '../../util/constants'
 
-@Controller('article')
+@Controller(Routes.ARTICLE)
 export class ArticleController {
+    constructor(
+        @Inject(Services.ARTICLE)
+        private readonly articleService: IArticleService,
+    ) {}
     @Get()
-    findAll(): string {
-        return 'Return all articles'
+    findAll() {
+        return this.articleService.findAll()
     }
-
     @Get(':id')
-    findById(@Param() params: GetArticleByIdParams): string {
-        return `Return article with id of: ${params.id}`
+    findById(@Param('id', ParseIntPipe) id: number) {
+        return this.articleService.findById(id)
     }
     @Get('category/:category')
-    findByCategory(@Param() params: GetArticleByCategoryParams): string {
-        return `Return article with category of: ${params.category}`
+    findByCategory(@Param('category') category: string) {
+        return this.articleService.findByCategory(category)
     }
-    @Get('tag/:tag')
-    findMustRead(@Param() params: GetArticleByTag): string {
-        return `Return article with tag of: ${params.tag}`
+    @Get('flag/:flag')
+    findByTag(@Param('flag') flag: string) {
+        return this.articleService.findByFlag(flag)
+    }
+
+    @Post()
+    createArticle(@Body() article: ArticleType) {
+        return this.articleService.insertArticle(article)
     }
 }
-
-interface GetArticleByIdParams {
-    id: string
-}
-interface GetArticleByCategoryParams {
-    category: string
-}
-interface GetArticleByTag {
-    tag: string
-}
-
 // app.get('/articles', (req, res) => {
 // 	res.send(articles);
 // });
