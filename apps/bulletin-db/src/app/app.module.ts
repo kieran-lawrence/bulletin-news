@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ArticleModule } from './article/article.module'
 import { PublisherModule } from './publisher/publisher.module'
+import { CommentModule } from './comment/comment.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import entities from '../util/typeorm'
 import { ConfigModule } from '@nestjs/config'
@@ -9,6 +10,7 @@ import { ConfigModule } from '@nestjs/config'
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
         ArticleModule,
         PublisherModule,
+        CommentModule,
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: process.env.DB_HOST,
