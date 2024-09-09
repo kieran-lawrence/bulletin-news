@@ -39,5 +39,6 @@ const StyledArticleTitle = styled.div<{
     span {
         color: ${(props) => props.categoryTextColor || '#e9353b'};
         font-weight: ${(props) => (props.bold ? 600 : 400)};
+        text-transform: capitalize;
     }
 `
