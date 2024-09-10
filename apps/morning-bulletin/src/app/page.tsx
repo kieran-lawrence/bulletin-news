@@ -7,6 +7,7 @@ import { store } from './utils/store'
 import { LatestNews } from './components/LatestNews'
 import { TrendingPages } from './components/TrendingPages'
 import { MustRead } from './components/MustRead'
+import { EditorPick } from './components/EditorsPick'
 
 export default function Index() {
     return (
@@ -16,6 +17,7 @@ export default function Index() {
                 <LatestNews />
                 <TrendingPages />
                 <MustRead />
+                <EditorPick />
             </Layout>
         </Provider>
     )
