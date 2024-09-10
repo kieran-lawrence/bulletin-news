@@ -8,6 +8,7 @@ import { LatestNews } from './components/LatestNews'
 import { TrendingPages } from './components/TrendingPages'
 import { MustRead } from './components/MustRead'
 import { EditorPick } from './components/EditorsPick'
+import { Categories } from './components/Categories'
 
 export default function Index() {
     return (
@@ -18,6 +19,7 @@ export default function Index() {
                 <TrendingPages />
                 <MustRead />
                 <EditorPick />
+                <Categories firstCategory="business" secondCategory="sport" />
             </Layout>
         </Provider>
     )

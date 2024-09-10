@@ -37,6 +37,7 @@ const SectionHeaderStyle = styled.h1`
     font-size: 24px;
     font-weight: 600;
     color: #1f1f1f;
+    text-transform: capitalize;
 `
 const StyledLink = styled(Link)`
     font-size: 14px;
