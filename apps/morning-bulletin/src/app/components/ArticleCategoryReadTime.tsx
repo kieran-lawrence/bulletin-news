@@ -18,9 +18,10 @@ export const ArticleCategoryReadTime = ({
 }: Props) => {
     return (
         <StyledArticleTitle
-            fontSize={fontSize}
-            fontColor={fontColor}
-            categoryTextColor={categoryTextColor}
+            $fontSize={fontSize}
+            $fontColor={fontColor}
+            $categoryTextColor={categoryTextColor}
+            $bold={bold}
         >
             <span>{articleCategory}</span> • {articleReadTime} min read
         </StyledArticleTitle>
@@ -28,17 +29,17 @@ export const ArticleCategoryReadTime = ({
 }
 
 const StyledArticleTitle = styled.div<{
-    fontSize?: string
-    fontColor?: string
-    bold?: boolean
-    categoryTextColor?: string
+    $fontSize?: string
+    $fontColor?: string
+    $bold?: boolean
+    $categoryTextColor?: string
 }>`
-    font-size: ${(props) => props.fontSize || '16px'};
-    color: ${(props) => props.fontColor || '#3c3c3c'};
+    font-size: ${(props) => props.$fontSize || '16px'};
+    color: ${(props) => props.$fontColor || '#3c3c3c'};
 
     span {
-        color: ${(props) => props.categoryTextColor || '#e9353b'};
-        font-weight: ${(props) => (props.bold ? 600 : 400)};
+        color: ${(props) => props.$categoryTextColor || '#e9353b'};
+        font-weight: ${(props) => (props.$bold ? 600 : 400)};
         text-transform: capitalize;
     }
 `

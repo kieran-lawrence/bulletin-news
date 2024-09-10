@@ -5,6 +5,8 @@ import { FeaturedArticle } from './components/FeaturedArticle'
 import Layout from './components/layout'
 import { store } from './utils/store'
 import { LatestNews } from './components/LatestNews'
+import { TrendingPages } from './components/TrendingPages'
+import { MustRead } from './components/MustRead'
 
 export default function Index() {
     return (
@@ -12,6 +14,8 @@ export default function Index() {
             <Layout>
                 <FeaturedArticle articleId={'1'} />
                 <LatestNews />
+                <TrendingPages />
+                <MustRead />
             </Layout>
         </Provider>
     )
