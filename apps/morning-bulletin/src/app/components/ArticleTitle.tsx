@@ -3,9 +3,9 @@ import { truncateArticleText } from '../utils/helpers'
 
 type Props = {
     shouldGrow?: boolean
-    title?: string
+    title: string
     fontSize?: string
-    truncAt?: number
+    truncAt: number
     fontColor?: string
 }
 export const ArticleTitle = ({
@@ -21,7 +21,7 @@ export const ArticleTitle = ({
             $fontSize={fontSize}
             $fontColor={fontColor}
         >
-            {truncateArticleText(title!, truncAt!)}
+            {truncateArticleText(title, truncAt)}
         </StyledArticleTitle>
     )
 }

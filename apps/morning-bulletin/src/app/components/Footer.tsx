@@ -1,23 +1,26 @@
+import { IconContext } from 'react-icons'
 import styled from 'styled-components'
+import { BiLogoLinkedin, BiLogoFacebook, BiLogoInstagram } from 'react-icons/bi'
+import { FaXTwitter } from 'react-icons/fa6'
 
 export const Footer = () => {
     return (
-        <>
-            <FooterTopContainer>
-                <FooterTopInnerTopWrap>
-                    <h1>Stay Up To Date</h1>
-                    <h2>
+        <FooterContainer>
+            <NewsletterWrapper>
+                <NewsletterHeroText>
+                    <h2>Stay Up To Date</h2>
+                    <h3>
                         Get the news first by <span>subscribing</span> to our
                         newsletter
-                    </h2>
-                </FooterTopInnerTopWrap>
-                <FooterTopInnerWrap>
+                    </h3>
+                </NewsletterHeroText>
+                <NewsletterSignupForm>
                     <input placeholder="Email" />
                     <button>Subscribe</button>
-                </FooterTopInnerWrap>
-            </FooterTopContainer>
+                </NewsletterSignupForm>
+            </NewsletterWrapper>
             <FooterBottomContainer>
-                <FooterBottomInnerContainer>
+                <BrandSocialContainer>
                     <div>
                         <h1>Bulletin</h1>
                         <FooterBottomTitleWrap>
@@ -25,25 +28,27 @@ export const Footer = () => {
                             knowledge and entertainment.
                         </FooterBottomTitleWrap>
                         <FooterSocialLinksListStyle>
-                            {/* <IconContext.Provider value={{ className: 'socialIcons' }}>
-                <li>
-                  <BiLogoFacebook />
-                </li>
-                <li>
-                  <FaXTwitter />
-                </li>
-                <li>
-                  <BiLogoInstagram />
-                </li>
-                <li>
-                  <BiLogoLinkedin />
-                </li>
-              </IconContext.Provider> */}
+                            <IconContext.Provider
+                                value={{ className: 'socialIcons' }}
+                            >
+                                <li>
+                                    <BiLogoFacebook />
+                                </li>
+                                <li>
+                                    <FaXTwitter />
+                                </li>
+                                <li>
+                                    <BiLogoInstagram />
+                                </li>
+                                <li>
+                                    <BiLogoLinkedin />
+                                </li>
+                            </IconContext.Provider>
                         </FooterSocialLinksListStyle>
                     </div>
                     <small>Copyright © 2023 Bulletin</small>
-                </FooterBottomInnerContainer>
-                <FooterBottomInnerContainer2>
+                </BrandSocialContainer>
+                <FooterLinkContainer>
                     <>
                         <FooterMenuListStyle>
                             <li>Business</li>
@@ -110,30 +115,38 @@ export const Footer = () => {
                             <li>Support Us</li>
                         </FooterMenuListStyle>
                     </>
-                </FooterBottomInnerContainer2>
+                </FooterLinkContainer>
             </FooterBottomContainer>
-        </>
+        </FooterContainer>
     )
 }
-const FooterTopContainer = styled.div`
+const FooterContainer = styled.footer`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+`
+const NewsletterWrapper = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: #f5f5f5;
     padding: 40px;
+    box-sizing: border-box;
     border-radius: 5px;
+    width: 65vw;
 `
-const FooterTopInnerTopWrap = styled.div`
+const NewsletterHeroText = styled.div`
     width: 50%;
 
-    h1 {
+    h2 {
         text-transform: uppercase;
         font-size: 16px;
         letter-spacing: 2px;
         padding-bottom: 10px;
         color: #1f1f1f;
     }
-    h2 {
+    h3 {
         font-size: 24px;
         color: #1f1f1f;
         font-weight: 600;
@@ -142,7 +155,7 @@ const FooterTopInnerTopWrap = styled.div`
         color: #e9353b;
     }
 `
-const FooterTopInnerWrap = styled.div`
+const NewsletterSignupForm = styled.div`
     display: flex;
     width: 50%;
     justify-content: flex-end;
@@ -173,8 +186,9 @@ const FooterBottomContainer = styled.div`
     display: flex;
     justify-content: space-between;
     gap: 40px;
+    width: 65vw;
 `
-const FooterBottomInnerContainer2 = styled.div`
+const FooterLinkContainer = styled.div`
     width: 70%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -185,7 +199,7 @@ const FooterBottomInnerContainer2 = styled.div`
         '. . . .'
         '. . . .';
 `
-const FooterBottomInnerContainer = styled.div`
+const BrandSocialContainer = styled.div`
     width: 30%;
     display: flex;
     flex-direction: column;
