@@ -25,16 +25,36 @@ export type ArticleSection = {
     attribution?: string
     url?: string
 }
-export type Intention = {
-    kind: string
-    index: number
-    length: number
-    link?: string
-}
 export type Comment = {
     id: number
     article: number
     author: string
     text: string
     publishedAt: string
+}
+
+export declare type Intention = Link | Emphasis | Important | Text
+
+interface IntentionType {
+    kind: string
+    index: number
+    length: number
+}
+export interface Link extends IntentionType {
+    kind: 'link'
+    link: string
+}
+
+export interface Emphasis extends IntentionType {
+    kind: 'emphasized'
+    text: string
+}
+
+export interface Important extends IntentionType {
+    kind: 'important'
+    text: string
+}
+export interface Text extends IntentionType {
+    kind: 'text'
+    text: string
 }
