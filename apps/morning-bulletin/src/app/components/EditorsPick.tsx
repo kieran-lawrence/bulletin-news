@@ -7,6 +7,7 @@ import { PublisherNameAndDate } from './PublisherNameAndDate'
 import { ArticleTitle } from './ArticleTitle'
 import { ArticleCategoryReadTime } from './ArticleCategoryReadTime'
 import styled from 'styled-components'
+import { Loader } from './Loader'
 
 export const EditorPick = () => {
     const {
@@ -22,7 +23,7 @@ export const EditorPick = () => {
                 showSeeMoreText
                 href="/flags/editors-pick"
             />
-            {isLoading && <>Loading...</>}
+            {isLoading && <Loader />}
             <EditorsPickWrapper>
                 {articles && (
                     <EditorsPickItem

@@ -7,6 +7,7 @@ import { ArticleCategoryReadTime } from './ArticleCategoryReadTime'
 import styled from 'styled-components'
 import { useGetArticleByIdQuery } from '../utils/store/article'
 import { getArticleSectionText } from '../utils/helpers'
+import { Loader } from './Loader'
 
 type Props = {
     articleId: string
@@ -28,7 +29,7 @@ export const FeaturedArticle = ({ articleId }: Props) => {
                 </h2>
             </FeaturedArticleHero>
             {error && <>An error has occurred</>}
-            {isLoading && <>Loading...</>}
+            {isLoading && <Loader />}
             {article && !isLoading && (
                 <StyledArticleLink
                     key={article.id}

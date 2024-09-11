@@ -9,6 +9,7 @@ import { getArticleSectionText } from '../utils/helpers'
 import { SectionHeader } from './SectionHeader'
 import { SectionWrapperStyle } from '../styles/shared'
 import styled from 'styled-components'
+import { Loader } from './Loader'
 
 export const MustRead = () => {
     const {
@@ -25,7 +26,7 @@ export const MustRead = () => {
                 href="/flags/must-read"
             />
             <StyledMustReadWrapper>
-                {isLoading && <>Loading...</>}
+                {isLoading && <Loader />}
                 {articles &&
                     articles.slice(0, 4).map((article, index) => (
                         <StyledMustReadCard

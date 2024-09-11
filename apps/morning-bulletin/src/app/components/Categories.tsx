@@ -6,6 +6,7 @@ import { PublisherNameAndDate } from './PublisherNameAndDate'
 import { ArticleTitle } from './ArticleTitle'
 import { ArticleCategoryReadTime } from './ArticleCategoryReadTime'
 import styled from 'styled-components'
+import { Loader } from './Loader'
 
 // Types for parent component
 type Categories = {
@@ -40,7 +41,7 @@ const Category = ({ category }: Props) => {
                 href={`/categories/${category}`}
             />
             <StyledCategoriesWrapper>
-                {isLoading && <>Loading...</>}
+                {isLoading && <Loader />}
                 {articles &&
                     articles.slice(0, 2).map((article) => (
                         <StyledCategoryLink

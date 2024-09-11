@@ -8,6 +8,7 @@ import { ArticleTitle } from './ArticleTitle'
 import { PublisherNameAndDate } from './PublisherNameAndDate'
 import { SectionHeader } from './SectionHeader'
 import styled from 'styled-components'
+import { Loader } from './Loader'
 
 export const LatestNews = () => {
     const {
@@ -18,7 +19,7 @@ export const LatestNews = () => {
     return (
         <SectionWrapperStyle>
             <SectionHeader headerText="Latest News" showSeeMoreText />
-            {isLoading && <>Loading...</>}
+            {isLoading && <Loader />}
             {articles && (
                 <LatestNewsContainer>
                     {articles.slice(0, 4).map((article) => (
