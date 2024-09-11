@@ -4,9 +4,14 @@ import { SectionWrapperStyle } from '../styles/shared'
 import { SectionHeader } from './SectionHeader'
 import styled from 'styled-components'
 import Image from 'next/image'
+import { Loader } from './Loader'
 
 export const TrendingPages = () => {
-    const { data: publishers, error, isLoading } = useGetPublishersQuery('')
+    const {
+        data: publishers,
+        error,
+        isLoading,
+    } = useGetPublishersQuery({ page_size: 10 })
     return (
         <SectionWrapperStyle>
             <SectionHeader
@@ -15,7 +20,7 @@ export const TrendingPages = () => {
                 href="/pages"
             />
             <TrendingPagesContainer>
-                {isLoading && <>Loading...</>}
+                {isLoading && <Loader />}
                 {publishers &&
                     publishers.slice(0, 10).map((publisher: Publisher) => (
                         <StyledPublisherWrapper key={publisher.id}>
