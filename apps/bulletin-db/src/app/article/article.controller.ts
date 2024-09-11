@@ -6,10 +6,12 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
 } from '@nestjs/common'
 import { IArticleService } from './article'
 import { Article as ArticleType } from '../../util/types'
 import { Routes, Services } from '../../util/constants'
+import { FindAllArticlesDto } from './dtos/FindAll.dto'
 
 @Controller(Routes.ARTICLE)
 export class ArticleController {
@@ -18,8 +20,8 @@ export class ArticleController {
         private readonly articleService: IArticleService,
     ) {}
     @Get()
-    findAll() {
-        return this.articleService.findAll()
+    findAll(@Query() params?: FindAllArticlesDto) {
+        return this.articleService.findAll(params)
     }
     @Get(':id')
     findById(@Param('id', ParseIntPipe) id: number) {

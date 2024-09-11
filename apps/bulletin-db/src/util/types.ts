@@ -31,3 +31,8 @@ export type Publisher = {
     logoUrl?: number
     category: string
 }
+
+export interface FindArticleParams {
+    page?: number
+    page_size?: number
+}
