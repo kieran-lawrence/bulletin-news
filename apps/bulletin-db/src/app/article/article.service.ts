@@ -4,7 +4,12 @@ import { Article } from '../../util/typeorm/entities/Article'
 import { Repository } from 'typeorm'
 import { IArticleService } from './article'
 import { ArrayContains } from 'typeorm'
-import { FindArticleParams, Article as TypeArticle } from '../../util/types'
+import {
+    FindArticleByCategoryParams,
+    FindArticleByFlagParams,
+    PaginationParams,
+    Article as TypeArticle,
+} from '../../util/types'
 
 @Injectable()
 export class ArticleService implements IArticleService {
@@ -13,16 +18,14 @@ export class ArticleService implements IArticleService {
         private articleRepository: Repository<Article>,
     ) {}
 
-    findAll({ page_size, page = 1 }: FindArticleParams): Promise<Article[]> {
-        // Use skip as paging, but only if we're not on the first page
-        const skip = page <= 1 ? 0 : (page - 1) * page_size
+    findAll({ page_size, page = 1 }: PaginationParams): Promise<Article[]> {
         return this.articleRepository.find({
             cache: true,
             relations: {
                 publisher: true,
             },
             take: page_size,
-            skip,
+            skip: calculateSkip(page, page_size),
         })
     }
 
@@ -37,7 +40,11 @@ export class ArticleService implements IArticleService {
             cache: true,
         })
     }
-    findByCategory(category: string): Promise<Article[]> {
+    findByCategory({
+        category,
+        page,
+        page_size,
+    }: FindArticleByCategoryParams): Promise<Article[]> {
         return this.articleRepository.find({
             where: {
                 category,
@@ -46,9 +53,15 @@ export class ArticleService implements IArticleService {
                 publisher: true,
             },
             cache: true,
+            take: page_size,
+            skip: calculateSkip(page, page_size),
         })
     }
-    findByFlag(flag: string): Promise<Article[]> {
+    findByFlag({
+        flag,
+        page,
+        page_size,
+    }: FindArticleByFlagParams): Promise<Article[]> {
         return this.articleRepository.find({
             where: {
                 flags: ArrayContains([flag]),
@@ -57,10 +70,18 @@ export class ArticleService implements IArticleService {
                 publisher: true,
             },
             cache: true,
+            take: page_size,
+            skip: calculateSkip(page, page_size),
         })
     }
     async insertArticle(article: TypeArticle) {
         const savedArticle = await this.articleRepository.create(article)
         return this.articleRepository.save(savedArticle)
     }
+}
+
+/** Finds the offset (current page) by multiplying the desired page by the page size
+ */
+export const calculateSkip = (page: number, pageSize: number): number => {
+    return page <= 1 ? 0 : (page - 1) * pageSize
 }

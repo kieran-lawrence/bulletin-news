@@ -32,7 +32,13 @@ export type Publisher = {
     category: string
 }
 
-export interface FindArticleParams {
+export interface PaginationParams {
     page?: number
     page_size?: number
+}
+export interface FindArticleByCategoryParams extends PaginationParams {
+    category: string
+}
+export interface FindArticleByFlagParams extends PaginationParams {
+    flag: string
 }

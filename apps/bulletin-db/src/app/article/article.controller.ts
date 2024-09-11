@@ -11,7 +11,7 @@ import {
 import { IArticleService } from './article'
 import { Article as ArticleType } from '../../util/types'
 import { Routes, Services } from '../../util/constants'
-import { FindAllArticlesDto } from './dtos/FindAll.dto'
+import { PaginationQueryParamsDto } from './dtos/PaginationQueryParams'
 
 @Controller(Routes.ARTICLE)
 export class ArticleController {
@@ -20,20 +20,26 @@ export class ArticleController {
         private readonly articleService: IArticleService,
     ) {}
     @Get()
-    findAll(@Query() params?: FindAllArticlesDto) {
-        return this.articleService.findAll(params)
+    findAll(@Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto) {
+        return this.articleService.findAll({ page, page_size })
     }
     @Get(':id')
     findById(@Param('id', ParseIntPipe) id: number) {
         return this.articleService.findById(id)
     }
     @Get('category/:category')
-    findByCategory(@Param('category') category: string) {
-        return this.articleService.findByCategory(category)
+    findByCategory(
+        @Param('category') category: string,
+        @Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto,
+    ) {
+        return this.articleService.findByCategory({ category, page, page_size })
     }
     @Get('flag/:flag')
-    findByTag(@Param('flag') flag: string) {
-        return this.articleService.findByFlag(flag)
+    findByTag(
+        @Param('flag') flag: string,
+        @Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto,
+    ) {
+        return this.articleService.findByFlag({ flag, page, page_size })
     }
 
     @Post()
@@ -41,20 +47,3 @@ export class ArticleController {
         return this.articleService.insertArticle(article)
     }
 }
-// app.get('/articles', (req, res) => {
-// 	res.send(articles);
-// });
-// app.get('/articles/:id', (req, res) => {
-// 	const { id } = req.params;
-// 	const article = articles.find((a) => a.id === parseInt(id));
-// 	res.send(article);
-// });
-// app.get('/articles/categories/:category', (req, res) => {
-// 	const { category } = req.params;
-// 	const article = articles.filter((article) => article.category.toLowerCase() === category.toLowerCase());
-// 	res.send(article);
-// });
-// app.get('/articles-must-read', (req, res) => {
-// 	const mustRead = articles.filter((article) => article.flags.find((f) => f === 'must-read'));
-// 	res.send(mustRead);
-// });
