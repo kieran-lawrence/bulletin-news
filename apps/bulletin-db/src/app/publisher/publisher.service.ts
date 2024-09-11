@@ -3,6 +3,8 @@ import { IPublisherService } from './publisher'
 import { Publisher } from '../../util/typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { PaginationParams } from '../../util/types'
+import { calculateSkip } from '../article/article.service'
 
 @Injectable()
 export class PublisherService implements IPublisherService {
@@ -10,9 +12,14 @@ export class PublisherService implements IPublisherService {
         @InjectRepository(Publisher)
         private publisherRepository: Repository<Publisher>,
     ) {}
-    findAll(): Promise<Publisher[]> {
+    findAll({ page_size, page = 1 }: PaginationParams): Promise<Publisher[]> {
         return this.publisherRepository.find({
             cache: true,
+            take: page_size,
+            skip: calculateSkip(page, page_size),
+            order: {
+                id: 'DESC',
+            },
         })
     }
     findById(id: number): Promise<Publisher> {

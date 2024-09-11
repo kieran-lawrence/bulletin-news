@@ -26,6 +26,9 @@ export class ArticleService implements IArticleService {
             },
             take: page_size,
             skip: calculateSkip(page, page_size),
+            order: {
+                id: 'DESC',
+            },
         })
     }
 
@@ -55,6 +58,9 @@ export class ArticleService implements IArticleService {
             cache: true,
             take: page_size,
             skip: calculateSkip(page, page_size),
+            order: {
+                id: 'DESC',
+            },
         })
     }
     findByFlag({
@@ -72,6 +78,9 @@ export class ArticleService implements IArticleService {
             cache: true,
             take: page_size,
             skip: calculateSkip(page, page_size),
+            order: {
+                id: 'DESC',
+            },
         })
     }
     async insertArticle(article: TypeArticle) {

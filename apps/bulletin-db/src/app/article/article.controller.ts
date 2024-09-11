@@ -11,7 +11,7 @@ import {
 import { IArticleService } from './article'
 import { Article as ArticleType } from '../../util/types'
 import { Routes, Services } from '../../util/constants'
-import { PaginationQueryParamsDto } from './dtos/PaginationQueryParams'
+import { PaginationQueryParamsDto } from '../../util/dtos/PaginationQueryParams'
 
 @Controller(Routes.ARTICLE)
 export class ArticleController {
