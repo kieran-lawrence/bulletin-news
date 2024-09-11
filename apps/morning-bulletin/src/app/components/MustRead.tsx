@@ -15,7 +15,7 @@ export const MustRead = () => {
         data: articles,
         error,
         isLoading,
-    } = useGetArticlesByFlagQuery('must-read')
+    } = useGetArticlesByFlagQuery({ flag: 'must-read', page_size: 4 })
 
     return (
         <SectionWrapperStyle>

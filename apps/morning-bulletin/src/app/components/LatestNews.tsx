@@ -10,7 +10,11 @@ import { SectionHeader } from './SectionHeader'
 import styled from 'styled-components'
 
 export const LatestNews = () => {
-    const { data: articles, error, isLoading } = useGetArticlesQuery('')
+    const {
+        data: articles,
+        error,
+        isLoading,
+    } = useGetArticlesQuery({ page_size: 4 })
     return (
         <SectionWrapperStyle>
             <SectionHeader headerText="Latest News" showSeeMoreText />

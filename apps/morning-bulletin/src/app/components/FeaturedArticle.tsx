@@ -51,6 +51,7 @@ export const FeaturedArticle = ({ articleId }: Props) => {
                             shouldGrow={true}
                             title={article.title}
                             fontSize="32px"
+                            truncAt={200}
                         />
                         <ArticleDescription
                             description={getArticleSectionText(

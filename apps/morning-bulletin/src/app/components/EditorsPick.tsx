@@ -13,7 +13,7 @@ export const EditorPick = () => {
         data: articles,
         error,
         isLoading,
-    } = useGetArticlesByFlagQuery('editors-pick')
+    } = useGetArticlesByFlagQuery({ flag: 'editors-pick', page_size: 5 })
 
     return (
         <SectionWrapperStyle>

@@ -31,7 +31,7 @@ const Category = ({ category }: Props) => {
         data: articles,
         error,
         isLoading,
-    } = useGetArticlesByCategoryQuery(category)
+    } = useGetArticlesByCategoryQuery({ category, page_size: 2 })
 
     return (
         <SectionWrapperStyle>
