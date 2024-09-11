@@ -3,7 +3,7 @@ import { IPublisherService } from './publisher'
 import { Publisher } from '../../util/typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { PaginationParams } from '../../util/types'
+import { PaginationParams, Publisher as PublisherType } from '../../util/types'
 import { calculateSkip } from '../article/article.service'
 
 @Injectable()
@@ -29,5 +29,9 @@ export class PublisherService implements IPublisherService {
             },
             cache: true,
         })
+    }
+    async insertPublisher(publisher: PublisherType) {
+        const savedPublisher = await this.publisherRepository.create(publisher)
+        return this.publisherRepository.save(savedPublisher)
     }
 }

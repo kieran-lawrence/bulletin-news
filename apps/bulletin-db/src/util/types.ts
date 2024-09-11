@@ -28,7 +28,7 @@ export type Publisher = {
     handle: string
     name: string
     description: string
-    logoUrl?: number
+    logoUrl?: string
     category: string
 }
 
