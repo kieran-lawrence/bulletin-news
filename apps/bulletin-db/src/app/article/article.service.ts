@@ -10,6 +10,7 @@ import {
     PaginationParams,
     Article as TypeArticle,
 } from '../../util/types'
+import { calculateSkip } from '../../util/helpers'
 
 @Injectable()
 export class ArticleService implements IArticleService {
@@ -87,10 +88,4 @@ export class ArticleService implements IArticleService {
         const savedArticle = await this.articleRepository.create(article)
         return this.articleRepository.save(savedArticle)
     }
-}
-
-/** Finds the offset (current page) by multiplying the desired page by the page size
- */
-export const calculateSkip = (page: number, pageSize: number): number => {
-    return page <= 1 ? 0 : (page - 1) * pageSize
 }

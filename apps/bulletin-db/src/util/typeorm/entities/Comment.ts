@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { User } from './User'
 import { Article } from './Article'
+import { CommentStatus } from '../../types'
 
 @Entity()
 export class Comment {
@@ -17,11 +18,14 @@ export class Comment {
     text: string
 
     @CreateDateColumn()
-    publishedAt: number
+    publishedAt: string
 
     @ManyToOne(() => User, (user) => user.id)
     user: User
 
     @ManyToOne(() => Article, (article) => article.id)
     article: Article
+
+    @Column('text')
+    status: CommentStatus
 }

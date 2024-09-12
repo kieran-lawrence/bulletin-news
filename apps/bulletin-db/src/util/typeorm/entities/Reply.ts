@@ -9,6 +9,7 @@ import {
 } from 'typeorm'
 import { User } from './User'
 import { Comment } from './Comment'
+import { CommentStatus } from '../../types'
 
 @Entity({ name: 'reply' })
 export class CommentReply {
@@ -27,4 +28,7 @@ export class CommentReply {
     @OneToOne(() => User, (user) => user.id)
     @JoinColumn()
     author: User
+
+    @Column('text')
+    status: CommentStatus
 }

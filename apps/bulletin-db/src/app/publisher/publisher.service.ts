@@ -4,7 +4,7 @@ import { Publisher } from '../../util/typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { PaginationParams, Publisher as PublisherType } from '../../util/types'
-import { calculateSkip } from '../article/article.service'
+import { calculateSkip } from '../../util/helpers'
 
 @Injectable()
 export class PublisherService implements IPublisherService {

@@ -5,6 +5,8 @@ import { CommentModule } from './comment/comment.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import entities from '../util/typeorm'
 import { ConfigModule } from '@nestjs/config'
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
@@ -22,6 +24,8 @@ import { ConfigModule } from '@nestjs/config'
             synchronize: true,
             cache: true,
         }),
+        UserModule,
+        AuthModule,
     ],
     controllers: [],
     providers: [],
