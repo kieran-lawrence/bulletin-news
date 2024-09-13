@@ -7,6 +7,7 @@ import {
     QuoteContainerStyle,
 } from '../styles/shared'
 import { jwtDecode, JwtPayload } from 'jwt-decode'
+import React from 'react'
 
 /**
  * Returns a relative date based on the difference between the current date and the provided date
@@ -62,6 +63,7 @@ const formatIntentionKind = (
                 </Link>
             )
         }
+        // 'text' kind is default
         default: {
             return <>{text?.slice(intention.index, splitEnd)}</>
         }
@@ -74,7 +76,7 @@ const formatIntention = (intentions: Intention[], text: string) => {
         const splitEnd = intention.index + intention.length
         const next = elements[index + 1]
         return (
-            <>
+            <React.Fragment key={index}>
                 {index === 0 && text.slice(0, intention.index)}
                 {intention.kind === 'emphasized' ? (
                     <em>{text.slice(intention.index, splitEnd)}</em>
@@ -83,34 +85,37 @@ const formatIntention = (intentions: Intention[], text: string) => {
                 )}
                 {!next && text.slice(splitEnd)}
                 {next && text.slice(splitEnd, next.index)}
-            </>
+            </React.Fragment>
         )
     })
     return styledIntention
 }
-export const formatArticleSections = (section: ArticleSection) => {
+export const formatArticleSections = (section: ArticleSection, key: number) => {
     const { kind, text } = section
 
     switch (kind) {
         case 'text': {
             if (section.intentions && section.intentions.length > 0) {
                 return (
-                    <ArticleSectionStyle>
+                    <ArticleSectionStyle key={key}>
                         {formatIntention(section.intentions, text)}
                     </ArticleSectionStyle>
                 )
-            } else return <ArticleSectionStyle>{text}</ArticleSectionStyle>
+            } else
+                return (
+                    <ArticleSectionStyle key={key}>{text}</ArticleSectionStyle>
+                )
         }
         case 'heading': {
             return (
-                <ArticleSectionStyle>
+                <ArticleSectionStyle key={key}>
                     <h2>{text}</h2>
                 </ArticleSectionStyle>
             )
         }
         case 'quote': {
             return (
-                <QuoteContainerStyle>
+                <QuoteContainerStyle key={key}>
                     <section>{text}</section>
                     <small>{section.attribution}</small>
                 </QuoteContainerStyle>
@@ -118,7 +123,7 @@ export const formatArticleSections = (section: ArticleSection) => {
         }
         case 'image': {
             return (
-                <ArticleSectionImageStyle>
+                <ArticleSectionImageStyle key={key}>
                     <img src={section.url} alt={section.text} />
                     {section.intentions && section.intentions.length > 0 ? (
                         <div>
@@ -131,7 +136,7 @@ export const formatArticleSections = (section: ArticleSection) => {
             )
         }
         default: {
-            return <ArticleSectionStyle>{text}</ArticleSectionStyle>
+            return <ArticleSectionStyle key={key}>{text}</ArticleSectionStyle>
         }
     }
 }
