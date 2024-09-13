@@ -19,8 +19,13 @@ export class PublisherController {
         private readonly publisherService: IPublisherService,
     ) {}
     @Get()
-    findAll(@Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto) {
-        return this.publisherService.findAll({ page, page_size })
+    findAll(
+        @Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto,
+    ) {
+        return this.publisherService.findAll({
+            page: parseInt(page),
+            page_size: parseInt(page_size),
+        })
     }
     @Get(':id')
     findById(@Param('id', ParseIntPipe) id: number) {

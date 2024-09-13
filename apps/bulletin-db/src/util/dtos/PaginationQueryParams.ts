@@ -1,10 +1,10 @@
-import { IsNumber, IsOptional } from 'class-validator'
+import { IsString, IsOptional } from 'class-validator'
 export class PaginationQueryParamsDto {
-    @IsNumber()
+    @IsString()
     @IsOptional()
-    page: number
+    page: string
 
-    @IsNumber()
+    @IsString()
     @IsOptional()
-    page_size: number
+    page_size: string
 }

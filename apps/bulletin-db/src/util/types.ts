@@ -33,7 +33,8 @@ export type Publisher = {
 }
 export type User = {
     id: number
-    name: string
+    firstName: string
+    lastName: string
     email: string
     dateOfBirth: string
     password: string
@@ -74,7 +75,8 @@ export interface FindCommentsByStatusParams extends PaginationParams {
     status: CommentStatus
 }
 export interface CreateUserParams {
-    name: string
+    firstName: string
+    lastName: string
     email: string
     dateOfBirth: string
     password: string

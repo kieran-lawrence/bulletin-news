@@ -20,8 +20,13 @@ export class ArticleController {
         private readonly articleService: IArticleService,
     ) {}
     @Get()
-    findAll(@Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto) {
-        return this.articleService.findAll({ page, page_size })
+    findAll(
+        @Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto,
+    ) {
+        return this.articleService.findAll({
+            page: parseInt(page),
+            page_size: parseInt(page_size),
+        })
     }
     @Get(':id')
     findById(@Param('id', ParseIntPipe) id: number) {
@@ -30,16 +35,24 @@ export class ArticleController {
     @Get('category/:category')
     findByCategory(
         @Param('category') category: string,
-        @Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto,
+        @Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto,
     ) {
-        return this.articleService.findByCategory({ category, page, page_size })
+        return this.articleService.findByCategory({
+            category,
+            page: parseInt(page),
+            page_size: parseInt(page_size),
+        })
     }
     @Get('flag/:flag')
     findByTag(
         @Param('flag') flag: string,
-        @Query() { page = 1, page_size = 10 }: PaginationQueryParamsDto,
+        @Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto,
     ) {
-        return this.articleService.findByFlag({ flag, page, page_size })
+        return this.articleService.findByFlag({
+            flag,
+            page: parseInt(page),
+            page_size: parseInt(page_size),
+        })
     }
 
     @Post()
