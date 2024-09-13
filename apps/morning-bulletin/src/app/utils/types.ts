@@ -27,10 +27,30 @@ export type ArticleSection = {
 }
 export type Comment = {
     id: number
-    article: number
-    author: string
     text: string
     publishedAt: string
+    user: User
+    article: Article
+    status: CommentStatus
+}
+export type User = {
+    id: number
+    firstName: string
+    lastName: string
+    email: string
+    dateOfBirth: string
+    password: string
+    role: UserRole
+}
+
+export enum UserRole {
+    USER = 'user',
+    MOD = 'moderator',
+    ADMIN = 'administrator',
+}
+export enum CommentStatus {
+    LIVE = 'live',
+    DEAD = 'dead',
 }
 
 export declare type Intention = Link | Emphasis | Important | Text

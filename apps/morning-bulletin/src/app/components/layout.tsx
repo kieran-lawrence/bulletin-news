@@ -2,14 +2,13 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
-import { Provider } from 'react-redux'
-import { store } from '../utils/store'
+import Providers from '../contexts'
 
 type Props = { children: ReactNode; contentWidth?: string }
 
 export default function Layout({ children, contentWidth }: Props) {
     return (
-        <Provider store={store}>
+        <Providers>
             <StyledPage>
                 <StyledContentWrapper $width={contentWidth}>
                     <Header />
@@ -17,7 +16,7 @@ export default function Layout({ children, contentWidth }: Props) {
                     <Footer />
                 </StyledContentWrapper>
             </StyledPage>
-        </Provider>
+        </Providers>
     )
 }
 
