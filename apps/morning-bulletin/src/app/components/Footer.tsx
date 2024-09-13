@@ -2,6 +2,7 @@ import { IconContext } from 'react-icons'
 import styled from 'styled-components'
 import { BiLogoLinkedin, BiLogoFacebook, BiLogoInstagram } from 'react-icons/bi'
 import { FaXTwitter } from 'react-icons/fa6'
+import { BulletinButton } from '../styles/shared'
 
 export const Footer = () => {
     return (
@@ -16,7 +17,7 @@ export const Footer = () => {
                 </NewsletterHeroText>
                 <NewsletterSignupForm>
                     <input placeholder="Email" />
-                    <button>Subscribe</button>
+                    <BulletinButton>Subscribe</BulletinButton>
                 </NewsletterSignupForm>
             </NewsletterWrapper>
             <FooterBottomContainer>
@@ -169,16 +170,6 @@ const NewsletterSignupForm = styled.div`
 
         :focus {
             outline: 1px solid #e50914;
-        }
-    }
-    button {
-        border: none;
-        background-color: #e50914;
-        color: #fff;
-        border-radius: 5px;
-        padding: 10px;
-        &:hover {
-            cursor: pointer;
         }
     }
 `

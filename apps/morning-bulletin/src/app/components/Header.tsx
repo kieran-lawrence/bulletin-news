@@ -1,19 +1,27 @@
 import styled from 'styled-components'
 import Link from 'next/link'
-import Image from 'next/image'
+import { HeaderLogo } from './HeaderLogo'
+import { useAuth } from '../contexts/AuthContext'
+import { FaRegUserCircle } from 'react-icons/fa'
+import { IconContext } from 'react-icons'
+import { BulletinLinkButton, BulletinButtonAlt } from '../styles/shared'
+import { useState } from 'react'
+import { invalidateCookie } from '../utils/helpers'
+
 export const Header = () => {
+    const user = useAuth()
+    const [showAccountMenu, setShowAccountMenu] = useState(false)
+
+    const handleLogout = () => {
+        setShowAccountMenu(false)
+        // "logout"
+        invalidateCookie('TOKEN')
+        window.location.reload()
+    }
     return (
         <HeaderContainer>
             <HeaderStyle>
-                <HeaderLogoWrap href="/">
-                    <h1>Bulletin</h1>
-                    <HeaderLogo
-                        src="/BulletinLogoSmall.png"
-                        alt="Bulletin Logo"
-                        width={64}
-                        height={64}
-                    />
-                </HeaderLogoWrap>
+                <HeaderLogo />
                 <HeaderMenuStyle>
                     <li>
                         <HeaderLink href={'/'}>News</HeaderLink>
@@ -35,6 +43,39 @@ export const Header = () => {
                     </li>
                 </HeaderMenuStyle>
             </HeaderStyle>
+            <AccountManagement>
+                {user ? (
+                    <IconContext.Provider value={{ className: 'accountIcon' }}>
+                        {showAccountMenu && (
+                            <AccountMenu>
+                                <li>
+                                    <BulletinLinkButton
+                                        href="/account"
+                                        $padding="6px 12px"
+                                    >
+                                        Account
+                                    </BulletinLinkButton>
+                                </li>
+                                <li>
+                                    <BulletinButtonAlt
+                                        onClick={handleLogout}
+                                        $padding="6px 12px"
+                                    >
+                                        Logout
+                                    </BulletinButtonAlt>
+                                </li>
+                            </AccountMenu>
+                        )}
+                        <FaRegUserCircle
+                            onClick={() => setShowAccountMenu(!showAccountMenu)}
+                        />
+                    </IconContext.Provider>
+                ) : (
+                    <BulletinLinkButton href={'/login'}>
+                        Log In
+                    </BulletinLinkButton>
+                )}
+            </AccountManagement>
         </HeaderContainer>
     )
 }
@@ -43,25 +84,6 @@ const HeaderContainer = styled.header`
     display: flex;
     justify-content: center;
     align-items: center;
-`
-const HeaderLogo = styled(Image)`
-    width: 'auto';
-    margin: 0 5px 0 2px;
-    aspect-ratio: 1/1;
-`
-const HeaderLogoWrap = styled(Link)`
-    color: #e9353b;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    h1 {
-        margin: 0;
-        font-size: 48px;
-
-        font-weight: 600;
-        font-family: 'Noto Serif', serif;
-    }
 `
 const HeaderLink = styled(Link)`
     color: #1f1f1f;
@@ -83,7 +105,7 @@ const HeaderStyle = styled.div`
     flex-direction: row;
     align-items: center;
     font-size: 20px;
-    width: 65vw;
+    width: 50vw;
     gap: 24px;
 `
 const HeaderMenuStyle = styled.ul`
@@ -95,4 +117,35 @@ const HeaderMenuStyle = styled.ul`
     font-size: 16px;
     padding: 0 5px;
     margin: 0;
+`
+const AccountManagement = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    color: #1f1f1f;
+    font-size: 17px;
+    padding: 0 5px;
+    margin: 0;
+    width: 15vw;
+    gap: 16px;
+    position: relative;
+
+    .accountIcon {
+        width: 28px;
+        height: 28px;
+        fill: #de6676;
+        cursor: pointer;
+        &:hover {
+            fill: #e9353b;
+        }
+    }
+`
+const AccountMenu = styled.ul`
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 8px;
 `
