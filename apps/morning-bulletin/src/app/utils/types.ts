@@ -18,13 +18,6 @@ export type Article = {
     publishedAt: string
     flags: [string]
 }
-export type ArticleSection = {
-    kind: string
-    text?: string
-    intentions: Intention[]
-    attribution?: string
-    url?: string
-}
 export type Comment = {
     id: number
     text: string
@@ -54,7 +47,11 @@ export enum CommentStatus {
 }
 
 export declare type Intention = Link | Emphasis | Important | Text
-
+export declare type ArticleSection =
+    | TextSection
+    | ImageSection
+    | QuoteSection
+    | HeadingSection
 interface IntentionType {
     kind: string
     index: number
@@ -76,5 +73,29 @@ export interface Important extends IntentionType {
 }
 export interface Text extends IntentionType {
     kind: 'text'
+    text: string
+}
+
+interface ArticleSections {
+    kind: string
+}
+export interface TextSection extends ArticleSections {
+    kind: 'text'
+    text: string
+    intentions?: Intention[]
+}
+export interface ImageSection extends ArticleSections {
+    kind: 'image'
+    url: string
+    text: string
+    intentions?: Intention[]
+}
+export interface QuoteSection extends ArticleSections {
+    kind: 'quote'
+    text: string
+    attribution: string
+}
+export interface HeadingSection extends ArticleSections {
+    kind: 'heading'
     text: string
 }

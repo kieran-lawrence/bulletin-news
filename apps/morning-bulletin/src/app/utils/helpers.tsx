@@ -6,6 +6,7 @@ import {
     ArticleSectionStyle,
     QuoteContainerStyle,
 } from '../styles/shared'
+import { jwtDecode, JwtPayload } from 'jwt-decode'
 
 /**
  * Returns a relative date based on the difference between the current date and the provided date
@@ -88,14 +89,14 @@ const formatIntention = (intentions: Intention[], text: string) => {
     return styledIntention
 }
 export const formatArticleSections = (section: ArticleSection) => {
-    const { kind, intentions, text, attribution, url } = section
+    const { kind, text } = section
 
     switch (kind) {
         case 'text': {
-            if (intentions && intentions.length > 0) {
+            if (section.intentions && section.intentions.length > 0) {
                 return (
                     <ArticleSectionStyle>
-                        {text && formatIntention(intentions, text)}
+                        {formatIntention(section.intentions, text)}
                     </ArticleSectionStyle>
                 )
             } else return <ArticleSectionStyle>{text}</ArticleSectionStyle>
@@ -111,7 +112,7 @@ export const formatArticleSections = (section: ArticleSection) => {
             return (
                 <QuoteContainerStyle>
                     <section>{text}</section>
-                    <small>{attribution}</small>
+                    <small>{section.attribution}</small>
                 </QuoteContainerStyle>
             )
         }
@@ -119,8 +120,10 @@ export const formatArticleSections = (section: ArticleSection) => {
             return (
                 <ArticleSectionImageStyle>
                     <img src={section.url} alt={section.text} />
-                    {intentions && intentions.length > 0 ? (
-                        <div>{text && formatIntention(intentions, text)}</div>
+                    {section.intentions && section.intentions.length > 0 ? (
+                        <div>
+                            {text && formatIntention(section.intentions, text)}
+                        </div>
                     ) : (
                         <div>{section.text}</div>
                     )}
@@ -131,4 +134,30 @@ export const formatArticleSections = (section: ArticleSection) => {
             return <ArticleSectionStyle>{text}</ArticleSectionStyle>
         }
     }
+}
+export const addCookie = (key: string, value: string) => {
+    if (typeof document === 'undefined') return
+    document.cookie = `${key}=${value}`
+}
+export const invalidateCookie = (key: string) => {
+    if (typeof document === 'undefined') return
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:01 GMT;`
+}
+export const validateCookie = (key: string): string | undefined => {
+    if (typeof document !== 'undefined') {
+        const cookie = document.cookie
+            .split('; ')
+            .find((c) => c.startsWith(`${key}=`))
+            ?.split('=')[1]
+
+        if (cookie) {
+            const { exp }: JwtPayload = jwtDecode(cookie)
+            const currentTime = Math.floor(Date.now() / 1000)
+
+            if (exp && exp > currentTime) {
+                return cookie
+            }
+        }
+    }
+    return
 }
