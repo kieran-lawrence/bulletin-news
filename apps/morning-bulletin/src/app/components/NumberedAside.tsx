@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { truncateArticleText } from '../utils/helpers'
 import { Article } from '../utils/types'
 import Link from 'next/link'
+import React from 'react'
 
 interface NumberedAsideProps {
     articles: Article[]
@@ -13,12 +14,16 @@ export const NumberedAside = ({ articles, heading }: NumberedAsideProps) => {
             <h2>{heading}</h2>
             <NumberedArticleContainer>
                 {articles.map((article, index) => (
-                    <>
+                    <React.Fragment key={index}>
                         {index === 0 && (
-                            <img src={article.urlToImage} alt={article.title} />
+                            <img
+                                key={99}
+                                src={article.urlToImage}
+                                alt={article.title}
+                            />
                         )}
                         <ArticleCounter>{index + 1}</ArticleCounter>
-                        <ArticleList key={article.id}>
+                        <ArticleList>
                             <Link href={`/articles/${article.id}`}>
                                 {truncateArticleText(article.title, 65)}
                             </Link>
@@ -29,7 +34,7 @@ export const NumberedAside = ({ articles, heading }: NumberedAsideProps) => {
                                 • <small>{article.readTime} min read</small>
                             </TrendingArticleCategory>
                         </ArticleList>
-                    </>
+                    </React.Fragment>
                 ))}
             </NumberedArticleContainer>
         </StyledNumberedAside>

@@ -68,8 +68,8 @@ export const ArticlePage = ({ id }: ArticleProps) => {
                         <StyledArticle>
                             {article &&
                                 article.articleSections &&
-                                article.articleSections.map((section) =>
-                                    formatArticleSections(section),
+                                article.articleSections.map((section, index) =>
+                                    formatArticleSections(section, index),
                                 )}
                         </StyledArticle>
                         {trendingArticles && (
