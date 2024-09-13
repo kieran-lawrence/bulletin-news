@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-
+import Link from 'next/link'
 export const SectionWrapperStyle = styled.div`
     display: grid;
     place-items: center;
@@ -49,4 +49,61 @@ export const QuoteContainerStyle = styled.div`
         font-size: 14px;
         font-style: normal;
     }
+`
+export const BulletinButton = styled.button<{
+    $padding?: string
+    $fontWeight?: number
+    $fontSize?: string
+}>`
+    border: none;
+    background-color: #e50914;
+    color: #f1f1f1;
+    border-radius: 5px;
+    font-size: ${(props) => props.$fontSize || '16px'};
+    font-weight: ${(props) => props.$fontWeight || 400};
+    padding: ${(props) => props.$padding || '10px 20px'};
+    &:hover {
+        cursor: pointer;
+        background: #c72a30;
+    }
+    transition: background 0.2s ease;
+`
+export const BulletinButtonAlt = styled.button<{
+    $padding?: string
+    $fontWeight?: number
+    $fontSize?: string
+}>`
+    border: 1px solid #e50914;
+    background: none;
+
+    border-radius: 5px;
+    font-size: ${(props) => props.$fontSize || '16px'};
+    font-weight: ${(props) => props.$fontWeight || 400};
+    padding: ${(props) => props.$padding || '10px 20px'};
+    text-decoration: none;
+    &:hover {
+        cursor: pointer;
+        background: #e50914;
+        color: #f1f1f1;
+    }
+    transition: background 0.2s ease;
+`
+export const BulletinLinkButton = styled(Link)<{
+    $padding?: string
+    $fontWeight?: number
+    $fontSize?: string
+}>`
+    border: none;
+    background-color: #e50914;
+    color: #f1f1f1;
+    border-radius: 5px;
+    font-size: ${(props) => props.$fontSize || '16px'};
+    font-weight: ${(props) => props.$fontWeight || 400};
+    padding: ${(props) => props.$padding || '10px 20px'};
+    text-decoration: none;
+    &:hover {
+        cursor: pointer;
+        background: #c72a30;
+    }
+    transition: background 0.2s ease;
 `
