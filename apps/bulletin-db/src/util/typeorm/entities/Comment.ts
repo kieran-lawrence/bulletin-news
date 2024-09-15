@@ -23,7 +23,7 @@ export class Comment {
     @ManyToOne(() => User, (user) => user.id)
     user: User
 
-    @ManyToOne(() => Article, (article) => article.id)
+    @ManyToOne(() => Article, (article) => article.comment)
     article: Article
 
     @Column('text')

@@ -1,5 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+} from 'typeorm'
 import { Publisher } from './Publisher'
+import { Comment } from './Comment'
 import { ArticleSection } from '../../types'
 
 @Entity()
@@ -33,4 +41,8 @@ export class Article {
 
     @ManyToOne(() => Publisher, (publisher) => publisher.id)
     publisher: Publisher
+
+    @OneToMany(() => Comment, (comment) => comment.article)
+    @JoinColumn()
+    comment: Comment
 }
