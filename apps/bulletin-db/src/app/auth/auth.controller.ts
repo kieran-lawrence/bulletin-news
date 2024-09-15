@@ -23,7 +23,7 @@ export class AuthController {
 
     @UseGuards(AuthGuard)
     @Post('status')
-    getProfile(@Request() req) {
+    getAuthStatus(@Request() req) {
         return req.user
     }
 
@@ -31,5 +31,11 @@ export class AuthController {
     @UseGuards(AuthGuard)
     logout(@Res() res: Response) {
         res.send(200)
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('account')
+    getAccount(@Request() req) {
+        return this.authService.getAccount(req.user.email)
     }
 }

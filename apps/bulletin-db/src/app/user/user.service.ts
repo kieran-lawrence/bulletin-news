@@ -20,6 +20,14 @@ export class UserService implements IUserService {
             where: {
                 email,
             },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                dateOfBirth: true,
+            },
             cache: true,
         })
     }
