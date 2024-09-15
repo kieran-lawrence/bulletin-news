@@ -40,6 +40,7 @@ export class ArticleService implements IArticleService {
             },
             relations: {
                 publisher: true,
+                comment: true,
             },
             cache: true,
         })
