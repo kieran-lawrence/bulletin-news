@@ -14,5 +14,11 @@ import { Services } from '../../util/constants'
         },
     ],
     controllers: [ArticleController],
+    exports: [
+        {
+            provide: Services.ARTICLE,
+            useClass: ArticleService,
+        },
+    ],
 })
 export class ArticleModule {}

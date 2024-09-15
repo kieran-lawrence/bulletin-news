@@ -33,17 +33,21 @@ export class ArticleService implements IArticleService {
         })
     }
 
+    // Used when browsing to a specific article page
     findById(id: number): Promise<Article> {
-        return this.articleRepository.findOne({
-            where: {
-                id,
-            },
-            relations: {
-                publisher: true,
-                comment: true,
-            },
-            cache: true,
-        })
+        return this.articleRepository
+            .createQueryBuilder('article')
+            .where('article.id = :id', { id })
+            .leftJoinAndSelect('article.publisher', 'publisher')
+            .leftJoinAndSelect(
+                'article.comments',
+                'comments',
+                'comments.status = :status',
+                {
+                    status: 'live',
+                },
+            )
+            .getOne()
     }
     findByCategory({
         category,

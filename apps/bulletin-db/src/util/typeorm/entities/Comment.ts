@@ -23,9 +23,9 @@ export class Comment {
     @ManyToOne(() => User, (user) => user.id)
     user: User
 
-    @ManyToOne(() => Article, (article) => article.comment)
+    @ManyToOne(() => Article, (article) => article.comments)
     article: Article
 
-    @Column('text')
+    @Column('text', { default: CommentStatus.LIVE })
     status: CommentStatus
 }

@@ -82,3 +82,15 @@ export interface CreateUserParams {
     password: string
     role?: UserRole
 }
+export interface CreateCommentParams {
+    text: string
+    articleId: number
+    userEmail: string
+    publishedAt: string
+}
+export interface UpdateCommentParams {
+    id: number
+    text: string
+    userEmail: string
+    status: CommentStatus
+}
