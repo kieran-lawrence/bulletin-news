@@ -47,6 +47,7 @@ export class ArticleService implements IArticleService {
                     status: 'live',
                 },
             )
+            .leftJoinAndSelect('comments.user', 'user')
             .getOne()
     }
     findByCategory({
