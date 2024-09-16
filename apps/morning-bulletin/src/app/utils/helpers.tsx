@@ -140,9 +140,10 @@ export const formatArticleSections = (section: ArticleSection, key: number) => {
         }
     }
 }
-export const addCookie = (key: string, value: string) => {
-    if (typeof document === 'undefined') return
+export const addCookie = (key: string, value: string): boolean => {
+    if (typeof document === 'undefined') return false
     document.cookie = `${key}=${value}`
+    return true
 }
 export const invalidateCookie = (key: string) => {
     if (typeof document === 'undefined') return

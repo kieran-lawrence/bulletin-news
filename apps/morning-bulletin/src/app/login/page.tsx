@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import { HeaderLogo } from '../components/HeaderLogo'
 import { usePostLoginMutation } from '../utils/store/auth'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { Loader } from '../components/Loader'
 import { PiSealWarningBold } from 'react-icons/pi'
 import { addCookie } from '../utils/helpers'
 import { useRouter } from 'next/navigation'
@@ -19,19 +18,22 @@ interface LoginFormProps {
 
 export default function Login() {
     const user = useAuth()
-    const [handleLogin, { isLoading, error, data: result }] =
-        usePostLoginMutation()
+    const [handleLogin, { isLoading, error }] = usePostLoginMutation()
     const { register, handleSubmit } = useForm<LoginFormProps>()
     const router = useRouter()
 
     /** Sends login request, sets token cookie, and redirects to previous page on success */
     const onSubmit: SubmitHandler<LoginFormProps> = (data) => {
-        handleLogin(data).then(() => {
-            if (result && result.access_token) {
-                addCookie('TOKEN', result.access_token)
-                router.back()
-            }
-        })
+        handleLogin(data)
+            .unwrap()
+            .then((payload) => {
+                if (payload && payload.access_token) {
+                    // Verify token was saved before navigating back
+                    if (addCookie('TOKEN', payload.access_token)) {
+                        router.back()
+                    }
+                }
+            })
     }
 
     // Redirect to previous page if already signed in
@@ -76,7 +78,7 @@ export default function Login() {
                         $fontWeight={700}
                         $padding="16px 32px"
                     >
-                        {isLoading ? <Loader /> : 'Log In'}
+                        {isLoading ? 'Loading...' : 'Log In'}
                     </BulletinButton>
                 </LoginForm>
                 <Divider />
