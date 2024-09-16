@@ -1,7 +1,7 @@
 'use client'
 import { useContext, createContext, ReactNode, useEffect } from 'react'
 import { User } from '../utils/types'
-import { useGetAuthStatusMutation } from '../utils/store/auth'
+import { useGetAccountMutation } from '../utils/store/auth'
 import { validateCookie } from '../utils/helpers'
 import { Loader } from '../components/Loader'
 import styled from 'styled-components'
@@ -10,15 +10,14 @@ const AuthContext = createContext<User | undefined>(undefined)
 
 type Props = { children: ReactNode }
 export default function AuthContextProvider({ children }: Props) {
-    const [checkAuth, { isLoading, data }] = useGetAuthStatusMutation()
-
+    const [getUserInfo, { isLoading, data }] = useGetAccountMutation()
     useEffect(() => {
         const token = validateCookie('TOKEN')
         // Only attempt to refresh auth if we have a valid token
         if (token) {
-            checkAuth(token)
+            getUserInfo(token)
         }
-    }, [checkAuth])
+    }, [getUserInfo])
 
     return isLoading ? (
         <LoadingWrapper>

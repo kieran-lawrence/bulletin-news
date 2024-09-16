@@ -19,9 +19,9 @@ export const authApi = createApi({
         baseUrl: 'http://localhost:3001/api/auth',
     }) as BaseQueryFn<string | FetchArgs, unknown, NestJSError>,
     endpoints: (builder) => ({
-        getAuthStatus: builder.mutation<User, string>({
+        getAccount: builder.mutation<User, string>({
             query: (accessToken: string) => ({
-                url: `/status`,
+                url: `/account`,
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -38,7 +38,7 @@ export const authApi = createApi({
     }),
 })
 
-export const { useGetAuthStatusMutation, usePostLoginMutation } = authApi
+export const { usePostLoginMutation, useGetAccountMutation } = authApi
 
 interface LoginParams {
     email: string
