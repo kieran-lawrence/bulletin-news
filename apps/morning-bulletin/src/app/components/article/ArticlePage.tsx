@@ -12,7 +12,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Loader } from '../Loader'
 import { NumberedAside } from './NumberedAside'
-import { CommentsSection } from './Comment'
+import { CommentsContainer } from '../comments/CommentsContainer'
 
 type ArticleProps = {
     id: string
@@ -78,18 +78,7 @@ export const ArticlePage = ({ id }: ArticleProps) => {
                                             ),
                                     )}
                             </StyledArticle>
-                            {article.comments && article.comments.length > 0 ? (
-                                <StyledCommentsContainer>
-                                    <CommentsSection
-                                        comments={article.comments}
-                                    />
-                                </StyledCommentsContainer>
-                            ) : (
-                                <>
-                                    Nobody has commented on this article yet, be
-                                    the first!
-                                </>
-                            )}
+                            <CommentsContainer articleId={article.id} />
                         </StyledArticleCommentsWrap>
                         {trendingArticles && (
                             <NumberedAside
@@ -138,13 +127,6 @@ const StyledArticle = styled.article`
         border-radius: 5px;
         width: fit-content;
     }
-`
-const StyledCommentsContainer = styled.div`
-    background: #f5f5f5;
-    border-radius: 16px;
-    padding: 0 16px;
-    display: flex;
-    flex-direction: column;
 `
 const ArticleTitleContainer = styled.div`
     display: flex;

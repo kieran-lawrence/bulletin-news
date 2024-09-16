@@ -99,3 +99,9 @@ export interface HeadingSection extends ArticleSections {
     kind: 'heading'
     text: string
 }
+export type CreateCommentDto = {
+    text: string
+    publishedAt: string
+    articleId: number
+    accessToken: string
+}

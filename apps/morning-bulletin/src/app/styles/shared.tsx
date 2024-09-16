@@ -107,3 +107,18 @@ export const BulletinLinkButton = styled(Link)<{
     }
     transition: background 0.2s ease;
 `
+export const BulletTextInput = styled.input<{
+    $padding?: string
+    $width?: string
+}>`
+    border-radius: 5px;
+    border: 1px solid #434343;
+    padding: ${(props) => props.$padding || '10px 20px'};
+    width: ${(props) => props.$width || '60%'};
+    outline: none;
+
+    &:focus,
+    &:active {
+        border: 1px solid #e9353b;
+    }
+`
