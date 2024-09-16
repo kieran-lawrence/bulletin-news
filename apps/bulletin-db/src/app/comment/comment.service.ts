@@ -13,6 +13,7 @@ import {
     CommentStatus,
     UpdateCommentParams,
     UserRole,
+    FindCommentsByArticleIdParams,
 } from '../../util/types'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -51,6 +52,22 @@ export class CommentService implements ICommentService {
             cache: true,
         })
     }
+    findByArticleId({
+        page,
+        page_size,
+        articleId,
+    }: FindCommentsByArticleIdParams): Promise<Comment[]> {
+        return this.commentRepository
+            .createQueryBuilder('comment')
+            .leftJoin('comment.article', 'article')
+            .leftJoinAndSelect('comment.user', 'user')
+            .addSelect(['article.id'])
+            .where('article.id = :id', { id: articleId })
+            .take(page_size)
+            .skip(calculateSkip(page, page_size))
+            .orderBy('comment.publishedAt', 'DESC')
+            .getMany()
+    }
     findByStatus({
         status,
         page,
@@ -76,7 +93,6 @@ export class CommentService implements ICommentService {
         const user = await this.userService.findByEmail(comment.userEmail)
         if (!user) throw new NotFoundException('User not found')
         savedComment.user = user
-        console.log(comment.articleId)
         const article = await this.articleService.findById(comment.articleId)
         if (!article) throw new NotFoundException('Article not found')
         savedComment.article = article

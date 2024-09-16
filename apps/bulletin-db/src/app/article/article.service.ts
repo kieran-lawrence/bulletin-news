@@ -39,15 +39,6 @@ export class ArticleService implements IArticleService {
             .createQueryBuilder('article')
             .where('article.id = :id', { id })
             .leftJoinAndSelect('article.publisher', 'publisher')
-            .leftJoinAndSelect(
-                'article.comments',
-                'comments',
-                'comments.status = :status',
-                {
-                    status: 'live',
-                },
-            )
-            .leftJoinAndSelect('comments.user', 'user')
             .getOne()
     }
     findByCategory({

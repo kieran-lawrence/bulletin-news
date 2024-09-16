@@ -74,6 +74,9 @@ export interface FindArticleByFlagParams extends PaginationParams {
 export interface FindCommentsByStatusParams extends PaginationParams {
     status: CommentStatus
 }
+export interface FindCommentsByArticleIdParams extends PaginationParams {
+    articleId: number
+}
 export interface CreateUserParams {
     firstName: string
     lastName: string

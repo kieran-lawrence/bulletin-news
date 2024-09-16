@@ -37,6 +37,17 @@ export class CommentController {
     findById(@Param('id', ParseIntPipe) id: number) {
         return this.commentService.findById(id)
     }
+    @Get('article/:id')
+    findByArticleId(
+        @Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.commentService.findByArticleId({
+            page: parseInt(page),
+            page_size: parseInt(page_size),
+            articleId: id,
+        })
+    }
 
     @Post()
     @UseGuards(AuthGuard)
