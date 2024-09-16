@@ -31,20 +31,16 @@ export class UserService implements IUserService {
             cache: true,
         })
     }
-    findById(id: number): Promise<User | undefined> {
+    validateUser(email: string): Promise<User | undefined> {
         return this.userRepository.findOne({
             where: {
-                id,
+                email,
             },
             select: {
                 id: true,
                 email: true,
-                firstName: true,
-                lastName: true,
-                role: true,
-                dateOfBirth: true,
+                password: true,
             },
-            cache: true,
         })
     }
 }

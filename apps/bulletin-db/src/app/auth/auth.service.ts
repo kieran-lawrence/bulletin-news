@@ -20,7 +20,7 @@ export class AuthService {
         email: string,
         pass: string,
     ): Promise<{ access_token: string }> {
-        const user = await this.userService.findByEmail(email)
+        const user = await this.userService.validateUser(email)
         if (!user || user.password !== pass) {
             throw new UnauthorizedException(
                 'Username or password is incorrect.',
