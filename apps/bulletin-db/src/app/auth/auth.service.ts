@@ -1,9 +1,4 @@
-import {
-    ConflictException,
-    Inject,
-    Injectable,
-    UnauthorizedException,
-} from '@nestjs/common'
+import { ConflictException, Inject, Injectable } from '@nestjs/common'
 import { IUserService } from '../user/user'
 import { Services } from '../../util/constants'
 import { JwtService } from '@nestjs/jwt'
@@ -18,14 +13,9 @@ export class AuthService {
 
     async signIn(
         email: string,
-        pass: string,
+        password: string,
     ): Promise<{ access_token: string }> {
-        const user = await this.userService.validateUser(email)
-        if (!user || user.password !== pass) {
-            throw new UnauthorizedException(
-                'Username or password is incorrect.',
-            )
-        }
+        const user = await this.userService.validateUser({ email, password })
         const payload = { sub: user.id, email: user.email }
         return {
             access_token: await this.jwtService.signAsync(payload),

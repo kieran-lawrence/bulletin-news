@@ -57,7 +57,7 @@ export enum CommentStatus {
     LIVE = 'live',
     DEAD = 'dead',
 }
-export type ValidateUserCredentials = {
+export type ValidateUserCredentialsParams = {
     email: string
     password: string
 }
