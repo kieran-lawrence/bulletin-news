@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { truncateArticleText } from '../utils/helpers'
-import { Article } from '../utils/types'
+import { truncateArticleText } from '../../utils/helpers'
+import { Article } from '../../utils/types'
 import Link from 'next/link'
 import React from 'react'
 
@@ -16,11 +16,7 @@ export const NumberedAside = ({ articles, heading }: NumberedAsideProps) => {
                 {articles.map((article, index) => (
                     <React.Fragment key={index}>
                         {index === 0 && (
-                            <img
-                                key={99}
-                                src={article.urlToImage}
-                                alt={article.title}
-                            />
+                            <img src={article.urlToImage} alt={article.title} />
                         )}
                         <ArticleCounter>{index + 1}</ArticleCounter>
                         <ArticleList>

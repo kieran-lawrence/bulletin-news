@@ -1,6 +1,6 @@
 import { format, differenceInHours } from 'date-fns'
 import Link from 'next/link'
-import { Intention, ArticleSection } from './types'
+import { Intention, ArticleSection, User, UserRole } from './types'
 import {
     ArticleSectionImageStyle,
     ArticleSectionStyle,
@@ -166,4 +166,10 @@ export const validateCookie = (key: string): string | undefined => {
         }
     }
     return
+}
+export const userIsModerator = (user: User): boolean => {
+    return user.role === UserRole.MOD
+}
+export const userIsAdmin = (user: User): boolean => {
+    return user.role === UserRole.ADMIN
 }

@@ -17,6 +17,7 @@ export type Article = {
     urlToImage: string
     publishedAt: string
     flags: [string]
+    comments?: Comment[]
 }
 export type Comment = {
     id: number
@@ -32,7 +33,6 @@ export type User = {
     lastName: string
     email: string
     dateOfBirth: string
-    password: string
     role: UserRole
 }
 

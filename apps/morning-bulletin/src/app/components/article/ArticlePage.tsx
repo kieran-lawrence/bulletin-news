@@ -2,16 +2,17 @@ import { format } from 'date-fns'
 import {
     useGetArticleByIdQuery,
     useGetArticlesByFlagQuery,
-} from '../utils/store/article'
-import { formatArticleSections } from '../utils/helpers'
+} from '../../utils/store/article'
+import { formatArticleSections } from '../../utils/helpers'
 import styled from 'styled-components'
 import { MdBookmarkAdd } from 'react-icons/md'
 import { BsThreeDots } from 'react-icons/bs'
 import { IconContext } from 'react-icons'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loader } from './Loader'
+import { Loader } from '../Loader'
 import { NumberedAside } from './NumberedAside'
+import { CommentsSection } from './Comment'
 
 type ArticleProps = {
     id: string
@@ -65,13 +66,31 @@ export const ArticlePage = ({ id }: ArticleProps) => {
                         </ArticleByLine>
                     </ArticleBylineContainer>
                     <StyledArticleContent>
-                        <StyledArticle>
-                            {article &&
-                                article.articleSections &&
-                                article.articleSections.map((section, index) =>
-                                    formatArticleSections(section, index),
-                                )}
-                        </StyledArticle>
+                        <StyledArticleCommentsWrap>
+                            <StyledArticle>
+                                {article &&
+                                    article.articleSections &&
+                                    article.articleSections.map(
+                                        (section, index) =>
+                                            formatArticleSections(
+                                                section,
+                                                index,
+                                            ),
+                                    )}
+                            </StyledArticle>
+                            {article.comments && article.comments.length > 0 ? (
+                                <StyledCommentsContainer>
+                                    <CommentsSection
+                                        comments={article.comments}
+                                    />
+                                </StyledCommentsContainer>
+                            ) : (
+                                <>
+                                    Nobody has commented on this article yet, be
+                                    the first!
+                                </>
+                            )}
+                        </StyledArticleCommentsWrap>
                         {trendingArticles && (
                             <NumberedAside
                                 articles={trendingArticles}
@@ -101,11 +120,15 @@ const StyledHeroImage = styled.img`
     object-fit: contain;
     margin-bottom: 24px;
 `
+const StyledArticleCommentsWrap = styled.div`
+    width: 42vw;
+    display: flex;
+    flex-direction: column;
+`
 const StyledArticle = styled.article`
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 42vw;
     box-sizing: border-box;
     color: #363636;
     small {
@@ -115,6 +138,13 @@ const StyledArticle = styled.article`
         border-radius: 5px;
         width: fit-content;
     }
+`
+const StyledCommentsContainer = styled.div`
+    background: #f5f5f5;
+    border-radius: 16px;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
 `
 const ArticleTitleContainer = styled.div`
     display: flex;
