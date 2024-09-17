@@ -6,9 +6,15 @@ import { Comment } from '../../util/typeorm'
 import { Services } from '../../util/constants'
 import { UserModule } from '../user/user.module'
 import { ArticleModule } from '../article/article.module'
+import { ThreadModule } from '../thread/thread.module'
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Comment]), UserModule, ArticleModule],
+    imports: [
+        TypeOrmModule.forFeature([Comment]),
+        UserModule,
+        ArticleModule,
+        ThreadModule,
+    ],
     controllers: [CommentController],
     providers: [
         {

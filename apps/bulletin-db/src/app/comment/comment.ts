@@ -5,6 +5,7 @@ import {
     CreateCommentParams,
     UpdateCommentParams,
     FindCommentsByArticleIdParams,
+    CreateCommentReplyParams,
 } from '../../util/types'
 
 export interface ICommentService {
@@ -14,6 +15,7 @@ export interface ICommentService {
         params: FindCommentsByArticleIdParams,
     ): Promise<CommentEntity[]>
     findByStatus(params: FindCommentsByStatusParams): Promise<CommentEntity[]>
-    insertComment(comment: CreateCommentParams): Promise<CommentEntity>
+    createComment(comment: CreateCommentParams): Promise<CommentEntity>
     updateComment(params: UpdateCommentParams): Promise<CommentEntity>
+    createReply(reply: CreateCommentReplyParams): Promise<CommentEntity>
 }

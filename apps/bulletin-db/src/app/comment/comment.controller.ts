@@ -17,6 +17,7 @@ import { AuthGuard } from '../auth/guards/auth.guard'
 import { PaginationQueryParamsDto } from '../../util/dtos/PaginationQueryParams'
 import { UpdateCommentDto } from './dtos/UpdateComment.dto'
 import { Request } from '@nestjs/common'
+import { CreateCommentReplyDto } from './dtos/CreateCommentReply.dto'
 
 @Controller(Routes.COMMENT)
 export class CommentController {
@@ -51,8 +52,8 @@ export class CommentController {
 
     @Post()
     @UseGuards(AuthGuard)
-    insertComment(@Request() req, @Body() comment: CreateCommentDto) {
-        return this.commentService.insertComment({
+    createComment(@Request() req, @Body() comment: CreateCommentDto) {
+        return this.commentService.createComment({
             ...comment,
             userEmail: req.user.email, // Extract user from JWT for comment author
         })
@@ -63,6 +64,15 @@ export class CommentController {
     updateComment(@Request() req, @Body() comment: UpdateCommentDto) {
         return this.commentService.updateComment({
             ...comment,
+            userEmail: req.user.email, // Extract user from JWT for comment author
+        })
+    }
+
+    @Post('reply')
+    @UseGuards(AuthGuard)
+    createCommentReply(@Request() req, @Body() reply: CreateCommentReplyDto) {
+        return this.commentService.createReply({
+            ...reply,
             userEmail: req.user.email, // Extract user from JWT for comment author
         })
     }
