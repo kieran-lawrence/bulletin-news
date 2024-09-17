@@ -8,6 +8,7 @@ import {
 import { User } from './User'
 import { Article } from './Article'
 import { CommentStatus } from '../../types'
+import { Thread } from './Thread'
 
 @Entity()
 export class Comment {
@@ -28,4 +29,7 @@ export class Comment {
 
     @Column('text', { default: CommentStatus.LIVE })
     status: CommentStatus
+
+    @ManyToOne(() => Thread, (thread) => thread.id)
+    thread: Thread
 }
