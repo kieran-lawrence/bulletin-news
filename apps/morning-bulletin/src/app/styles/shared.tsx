@@ -122,3 +122,10 @@ export const BulletTextInput = styled.input<{
         border: 1px solid #e9353b;
     }
 `
+export const FullScreenLoaderWrapper = styled.div`
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    width: 100vw;
+    background: #00000014;
+`

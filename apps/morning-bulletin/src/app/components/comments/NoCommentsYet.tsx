@@ -11,7 +11,7 @@ export const NoCommentsYet = () => {
             We&apos;re eager to hear your thoughts on this article.
             <StyledRegisterCTA>
                 {user
-                    ? `Leave a comment below and let's get the conversation started.`
+                    ? `Leave a comment and let's get the conversation started.`
                     : 'Only registered users can leave comments.'}
                 {!user && (
                     <StyledLinkActions>

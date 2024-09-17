@@ -3,6 +3,8 @@ import { CreateComment } from './CreateComment'
 import { NoCommentsYet } from './NoCommentsYet'
 import { CommentsSection } from './Comment'
 import { useGetCommentsByArticleIdQuery } from '../../utils/store/comment'
+import { FullScreenLoaderWrapper } from '../../styles/shared'
+import { Loader } from '../Loader'
 
 interface CommentsContainerProps {
     articleId: number
@@ -14,7 +16,9 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
         refetch,
     } = useGetCommentsByArticleIdQuery(articleId)
     return isLoading ? (
-        <>Loading</>
+        <FullScreenLoaderWrapper>
+            <Loader />
+        </FullScreenLoaderWrapper>
     ) : (
         <StyledCommentsContainer>
             <CreateComment articleId={articleId} onCreateComment={refetch} />
