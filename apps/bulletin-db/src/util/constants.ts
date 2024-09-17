@@ -4,6 +4,7 @@ export enum Services {
     USER = 'user_service',
     AUTH = 'auth_service',
     COMMENT = 'comment_service',
+    THREAD = 'thread_service',
 }
 export enum Routes {
     ARTICLE = 'article',

@@ -97,3 +97,10 @@ export interface UpdateCommentParams {
     userEmail: string
     status: CommentStatus
 }
+export interface CreateCommentReplyParams {
+    text: string
+    articleId: number
+    userEmail: string
+    publishedAt: string
+    threadId: number
+}
