@@ -26,6 +26,15 @@ export type Comment = {
     user: User
     article: Article
     status: CommentStatus
+    thread: Thread
+}
+export type Thread = {
+    id: number
+}
+export type ThreadParticipant = {
+    thread_participant_id: number
+    userId: number
+    threadId: number
 }
 export type User = {
     id: number

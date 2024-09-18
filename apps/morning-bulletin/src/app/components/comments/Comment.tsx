@@ -1,5 +1,5 @@
 import React from 'react'
-import { Comment as CommentType } from '../../utils/types'
+import { Comment as CommentType, User } from '../../utils/types'
 import styled from 'styled-components'
 import { formatDistance } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
@@ -12,26 +12,43 @@ interface CommentsSectionProps {
 }
 interface CommentProps {
     comment: CommentType
+    isFirstInThread?: boolean
+    replyingTo: string
+}
+type CommentAccumulator = {
+    [key: number]: CommentType[]
 }
 export const CommentsSection = ({ comments }: CommentsSectionProps) => {
-    return comments.map((comment) => (
-        <Comment key={comment.id} comment={comment} />
-    ))
+    // Group the comments by their threadId
+    const groupedComments = groupCommentsByThread(comments)
+
+    // Map the grouped comments to Comment components
+    return Object.keys(groupedComments).map((threadId: string) =>
+        groupedComments[Number(threadId)].map((comment, commentIndex) => (
+            <Comment
+                key={comment.id}
+                comment={comment}
+                isFirstInThread={commentIndex !== 0}
+                replyingTo={getShortenedName(
+                    groupedComments[Number(threadId)][0].user,
+                )} // The author of the first comment in the thread is who we are replying to
+            />
+        )),
+    )
 }
 
-const Comment = ({ comment }: CommentProps) => {
+const Comment = ({ comment, isFirstInThread, replyingTo }: CommentProps) => {
     const user = useAuth()
     const userInitials =
         comment.user.firstName.substring(0, 1) +
         comment.user.lastName.substring(0, 1)
+
     return (
-        <CommentWrapper>
+        <CommentWrapper $hasAdditionalPadding={isFirstInThread}>
             <CommentAvatar>{userInitials}</CommentAvatar>
             <CommentContentWrapper>
                 <CommentAuthor>
-                    {`${
-                        comment.user.firstName
-                    } ${comment.user.lastName.substring(0, 1)}`}
+                    {getShortenedName(comment.user)}
                     <time dateTime={comment.publishedAt}>
                         {formatDistance(
                             new Date(comment.publishedAt),
@@ -40,6 +57,9 @@ const Comment = ({ comment }: CommentProps) => {
                         )}
                     </time>
                 </CommentAuthor>
+                {isFirstInThread && (
+                    <span className="replyingTo">in reply to {replyingTo}</span>
+                )}
                 {comment.text}
                 <CommentActions>
                     <IconContext.Provider
@@ -65,12 +85,13 @@ const Comment = ({ comment }: CommentProps) => {
         </CommentWrapper>
     )
 }
-const CommentWrapper = styled.div`
+const CommentWrapper = styled.div<{ $hasAdditionalPadding?: boolean }>`
     display: flex;
     align-items: center;
     gap: 8px;
     border-bottom: 1px solid #6565659f;
-    padding: 16px 0;
+    padding: ${(props) =>
+        props.$hasAdditionalPadding ? '16px 64px' : '16px 0'};
     &:last-child {
         border-bottom: none;
     }
@@ -89,6 +110,14 @@ const CommentContentWrapper = styled.div`
     flex-direction: column;
     color: #383838;
     flex: 1;
+
+    .replyingTo {
+        color: #7a7a7a;
+        font-size: 14px;
+        padding: 0 0 4px 8px;
+        font-weight: 400;
+        font-style: italic;
+    }
 `
 const CommentAuthor = styled.address`
     font-size: 18px;
@@ -124,3 +153,27 @@ const CommentActions = styled.div`
         padding-right: 4px;
     }
 `
+/** Groups individual comments by their thread */
+const groupCommentsByThread = (comments: CommentType[]) => {
+    return comments.reduce(
+        (acc: CommentAccumulator, comment) => {
+            // Get the threadId from the comment
+            const threadId = comment.thread.id
+
+            // If the threadId is not already a key in the accumulator, create a new array
+            if (!acc[threadId]) {
+                acc[threadId] = []
+            }
+
+            // Add the comment to the array associated with the threadId
+            acc[threadId].push(comment)
+
+            // Return the grouped comments
+            return acc
+        },
+        {}, // Current value, (nothing)
+    )
+}
+const getShortenedName = (user: User): string => {
+    return `${user.firstName} ${user.lastName.substring(0, 1)}`
+}
