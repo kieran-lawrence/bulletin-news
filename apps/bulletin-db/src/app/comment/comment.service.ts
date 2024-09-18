@@ -158,7 +158,7 @@ export class CommentService implements ICommentService {
 
         // Find thread to attach to comment entity
         const thread = await this.threadService.getThreadById(reply.threadId)
-        console.log(thread)
+
         if (!thread) throw new NotFoundException('Thread not found')
         savedReply.thread = thread
 
