@@ -1,5 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Comment as CommentType, CreateCommentDto } from '../../types'
+import {
+    Comment as CommentType,
+    CreateCommentDto,
+    CreateCommentReplyDto,
+} from '../../types'
 export const commentApi = createApi({
     reducerPath: 'commentApi',
     baseQuery: fetchBaseQuery({
@@ -19,7 +23,20 @@ export const commentApi = createApi({
                 },
             }),
         }),
+        postCommentReply: builder.mutation<CommentType, CreateCommentReplyDto>({
+            query: ({ accessToken, ...reply }) => ({
+                url: '/reply',
+                method: 'POST',
+                body: reply,
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            }),
+        }),
     }),
 })
-export const { useGetCommentsByArticleIdQuery, usePostCommentMutation } =
-    commentApi
+export const {
+    useGetCommentsByArticleIdQuery,
+    usePostCommentMutation,
+    usePostCommentReplyMutation,
+} = commentApi

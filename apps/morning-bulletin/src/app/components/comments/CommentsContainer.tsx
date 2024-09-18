@@ -5,6 +5,7 @@ import { CommentsSection } from './Comment'
 import { useGetCommentsByArticleIdQuery } from '../../utils/store/comment'
 import { FullScreenLoaderWrapper } from '../../styles/shared'
 import { Loader } from '../Loader'
+import Link from 'next/link'
 
 interface CommentsContainerProps {
     articleId: number
@@ -21,9 +22,19 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
         </FullScreenLoaderWrapper>
     ) : (
         <StyledCommentsContainer>
+            <CommentDisclaimer>
+                Bulletin reserves the right to remove any comment that is deemed
+                inappropriate. <br />
+                Please review our{' '}
+                <Link href="/terms-of-service">community guidelines</Link> for
+                more information.
+            </CommentDisclaimer>
             <CreateComment articleId={articleId} onCreateComment={refetch} />
             {comments && comments.length > 0 ? (
-                <CommentsSection comments={comments} />
+                <CommentsSection
+                    comments={comments}
+                    onCreateComment={refetch}
+                />
             ) : (
                 <NoCommentsYet />
             )}
@@ -37,4 +48,14 @@ const StyledCommentsContainer = styled.div`
     padding: 16px;
     display: flex;
     flex-direction: column;
+`
+const CommentDisclaimer = styled.span`
+    padding: 12px 18px;
+    text-align: justify;
+    font-size: 14px;
+    color: #383838;
+
+    a {
+        color: #e50914;
+    }
 `

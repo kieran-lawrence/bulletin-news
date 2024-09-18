@@ -1,10 +1,12 @@
 import { SubmitHandler, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import { BulletinButton, BulletTextInput } from '../../styles/shared'
-import { CreateCommentDto } from '../../utils/types'
+import { CreateCommentDto, CreateCommentReplyDto } from '../../utils/types'
 import { validateCookie } from '../../utils/helpers'
-import { usePostCommentMutation } from '../../utils/store/comment'
-import Link from 'next/link'
+import {
+    usePostCommentMutation,
+    usePostCommentReplyMutation,
+} from '../../utils/store/comment'
 
 interface CreateCommentFormProps {
     text: string
@@ -12,37 +14,54 @@ interface CreateCommentFormProps {
 interface CreateCommentProps {
     articleId: number
     onCreateComment: () => void
+    isReplying?: boolean
+    replyingTo?: string
+    threadId?: number
 }
 
 export const CreateComment = ({
     articleId,
     onCreateComment,
+    isReplying = false,
+    replyingTo,
+    threadId,
 }: CreateCommentProps) => {
     const { register, handleSubmit, reset } = useForm<CreateCommentFormProps>()
     const [createComment, { isLoading }] = usePostCommentMutation()
+    const [createReply, { isLoading: loadingReplies }] =
+        usePostCommentReplyMutation()
     const onSubmit: SubmitHandler<CreateCommentFormProps> = (data) => {
         const accessToken = validateCookie('TOKEN')
         if (!accessToken) return
-        const comment: CreateCommentDto = {
-            text: data.text,
-            articleId,
-            publishedAt: new Date().toISOString(),
-            accessToken,
+
+        if (isReplying && threadId) {
+            const reply: CreateCommentReplyDto = {
+                text: data.text,
+                articleId,
+                publishedAt: new Date().toISOString(),
+                accessToken,
+                threadId,
+            }
+            createReply(reply).then(() => {
+                reset()
+                onCreateComment()
+            })
+        } else {
+            const comment: CreateCommentDto = {
+                text: data.text,
+                articleId,
+                publishedAt: new Date().toISOString(),
+                accessToken,
+            }
+            createComment(comment).then(() => {
+                reset()
+                onCreateComment()
+            })
         }
-        createComment(comment).then(() => {
-            reset()
-            onCreateComment()
-        })
     }
     return (
-        <>
-            <CommentDisclaimer>
-                Bulletin reserves the right to remove any comment that is deemed
-                inappropriate. <br />
-                Please review our{' '}
-                <Link href="/terms-of-service">community guidelines</Link> for
-                more information.
-            </CommentDisclaimer>
+        <CreateCommentWrapper>
+            {isReplying && <span>Replying to {replyingTo}</span>}
             <CreateCommentForm onSubmit={handleSubmit(onSubmit)}>
                 <BulletTextInput
                     type="text"
@@ -51,23 +70,28 @@ export const CreateComment = ({
                     {...register('text', { required: true })}
                 />
                 <BulletinButton type="submit">
-                    {isLoading ? '...' : 'Send'}
+                    {isLoading || loadingReplies ? '...' : 'Send'}
                 </BulletinButton>
             </CreateCommentForm>
-        </>
+        </CreateCommentWrapper>
     )
 }
-const CommentDisclaimer = styled.span`
-    padding: 12px 18px;
-    text-align: justify;
-    font-size: 14px;
-    color: #383838;
 
-    a {
-        color: #e50914;
-    }
-`
 const CreateCommentForm = styled.form`
     display: flex;
     gap: 8px;
+`
+const CreateCommentWrapper = styled.div`
+    padding: 8px;
+
+    span {
+        background: #dfdfdf;
+        width: max-content;
+        display: block;
+        padding: 0 16px;
+        margin: 0 8px;
+        border-top-right-radius: 5px;
+        border-top-left-radius: 5px;
+        box-sizing: border-box;
+    }
 `

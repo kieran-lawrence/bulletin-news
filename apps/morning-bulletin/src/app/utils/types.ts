@@ -114,3 +114,11 @@ export type CreateCommentDto = {
     articleId: number
     accessToken: string
 }
+
+export type CreateCommentReplyDto = {
+    text: string
+    publishedAt: string
+    articleId: number
+    threadId: number
+    accessToken: string
+}
