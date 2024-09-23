@@ -35,12 +35,30 @@ export const authApi = createApi({
                 body: loginParams,
             }),
         }),
+        postRegister: builder.mutation<User, RegisterParams>({
+            query: (registerParams) => ({
+                url: `/register`,
+                method: 'POST',
+                body: registerParams,
+            }),
+        }),
     }),
 })
 
-export const { usePostLoginMutation, useGetAccountMutation } = authApi
+export const {
+    usePostLoginMutation,
+    useGetAccountMutation,
+    usePostRegisterMutation,
+} = authApi
 
 interface LoginParams {
     email: string
+    password: string
+}
+interface RegisterParams {
+    firstName: string
+    lastName: string
+    email: string
+    dateOfBirth: string
     password: string
 }
