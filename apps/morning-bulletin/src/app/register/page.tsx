@@ -19,7 +19,7 @@ interface RegisterFormProps {
 }
 
 export default function Register() {
-    const user = useAuth()
+    const { user } = useAuth()
     const [handleRegister, { isLoading, error }] = usePostRegisterMutation()
     const { register, handleSubmit } = useForm<RegisterFormProps>()
     const router = useRouter()

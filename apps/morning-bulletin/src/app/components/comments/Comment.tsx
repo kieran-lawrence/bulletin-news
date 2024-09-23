@@ -48,7 +48,7 @@ const Comment = ({
     author,
     onCreateComment,
 }: CommentProps) => {
-    const user = useAuth()
+    const { user } = useAuth()
     const userInitials =
         comment.user.firstName.substring(0, 1) +
         comment.user.lastName.substring(0, 1)

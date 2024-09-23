@@ -17,7 +17,7 @@ interface LoginFormProps {
 }
 
 export default function Login() {
-    const user = useAuth()
+    const { user } = useAuth()
     const [handleLogin, { isLoading, error }] = usePostLoginMutation()
     const { register, handleSubmit } = useForm<LoginFormProps>()
     const router = useRouter()

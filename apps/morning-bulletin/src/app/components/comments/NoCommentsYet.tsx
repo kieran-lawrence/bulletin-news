@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { BulletinLinkButton } from '../../styles/shared'
 
 export const NoCommentsYet = () => {
-    const user = useAuth()
+    const { user } = useAuth()
     return (
         <StyledNoCommentsYet>
             <h3>Start the discussion! </h3>

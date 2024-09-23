@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { invalidateCookie } from '../utils/helpers'
 
 export const Header = () => {
-    const user = useAuth()
+    const { user } = useAuth()
     const [showAccountMenu, setShowAccountMenu] = useState(false)
 
     const handleLogout = () => {

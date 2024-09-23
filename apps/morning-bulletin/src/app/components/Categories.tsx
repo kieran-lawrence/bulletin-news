@@ -62,7 +62,7 @@ const Category = ({ category }: Props) => {
                             <ArticleTitle
                                 fontSize="16px"
                                 title={article.title}
-                                truncAt={85}
+                                truncAt={55}
                                 shouldGrow
                             />
                             <ArticleCategoryReadTime
