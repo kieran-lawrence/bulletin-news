@@ -13,6 +13,12 @@ import { Services } from '../../util/constants'
             useClass: PublisherService,
         },
     ],
+    exports: [
+        {
+            provide: Services.PUBLISHER,
+            useClass: PublisherService,
+        },
+    ],
     controllers: [PublisherController],
 })
 export class PublisherModule {}

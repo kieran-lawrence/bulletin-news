@@ -104,3 +104,14 @@ export interface CreateCommentReplyParams {
     publishedAt: string
     threadId: number
 }
+export interface CreateArticleParams {
+    author: string
+    title: string
+    category: string
+    readTime: number
+    urlToImage: string
+    publishedAt: string
+    flags: string[]
+    articleSections: ArticleSection[]
+    publisherId: number
+}

@@ -12,6 +12,7 @@ import { IArticleService } from './article'
 import { Article as ArticleType } from '../../util/types'
 import { Routes, Services } from '../../util/constants'
 import { PaginationQueryParamsDto } from '../../util/dtos/PaginationQueryParams'
+import { CreateArticleDto } from './dtos/CreateArticle.dto'
 
 @Controller(Routes.ARTICLE)
 export class ArticleController {
@@ -56,7 +57,7 @@ export class ArticleController {
     }
 
     @Post()
-    createArticle(@Body() article: ArticleType) {
-        return this.articleService.insertArticle(article)
+    createArticle(@Body() article: CreateArticleDto) {
+        return this.articleService.createArticle(article)
     }
 }

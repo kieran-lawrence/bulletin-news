@@ -1,6 +1,6 @@
 import { Article as ArticleEntity } from '../../util/typeorm/entities/Article'
 import {
-    Article,
+    CreateArticleParams,
     FindArticleByCategoryParams,
     FindArticleByFlagParams,
     PaginationParams,
@@ -13,5 +13,5 @@ export interface IArticleService {
         params: FindArticleByCategoryParams,
     ): Promise<ArticleEntity[]>
     findByFlag(params: FindArticleByFlagParams): Promise<ArticleEntity[]>
-    insertArticle(article: Article)
+    createArticle(article: CreateArticleParams)
 }
