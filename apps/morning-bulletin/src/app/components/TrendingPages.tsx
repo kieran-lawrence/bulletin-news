@@ -7,22 +7,20 @@ import Image from 'next/image'
 import { Loader } from './Loader'
 
 export const TrendingPages = () => {
-    const {
-        data: publishers,
-        error,
-        isLoading,
-    } = useGetPublishersQuery({ page_size: 10 })
+    const { data: publishers, isLoading } = useGetPublishersQuery({
+        page_size: 10,
+    })
     return (
         <SectionWrapperStyle>
             <SectionHeader
                 headerText="Trending Pages"
                 showSeeMoreText
-                href="/pages"
+                href="/publishers"
             />
             <TrendingPagesContainer>
                 {isLoading && <Loader />}
                 {publishers &&
-                    publishers.slice(0, 10).map((publisher: Publisher) => (
+                    publishers.map((publisher: Publisher) => (
                         <StyledPublisherWrapper key={publisher.id}>
                             <StyledPublisherLogoWrapper>
                                 <Image

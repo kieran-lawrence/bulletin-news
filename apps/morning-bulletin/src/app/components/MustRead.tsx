@@ -28,7 +28,7 @@ export const MustRead = () => {
             <StyledMustReadWrapper>
                 {isLoading && <Loader />}
                 {articles &&
-                    articles.slice(0, 4).map((article, index) => (
+                    articles.map((article, index) => (
                         <StyledMustReadCard
                             key={index}
                             href={`/articles/${article.id}`}

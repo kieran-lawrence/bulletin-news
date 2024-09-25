@@ -43,7 +43,7 @@ const Category = ({ category }: Props) => {
             <StyledCategoriesWrapper>
                 {isLoading && <Loader />}
                 {articles &&
-                    articles.slice(0, 2).map((article) => (
+                    articles.map((article) => (
                         <StyledCategoryLink
                             key={article.id}
                             href={`/articles/${article.id}`}

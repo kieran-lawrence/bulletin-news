@@ -22,7 +22,7 @@ export const LatestNews = () => {
             {isLoading && <Loader />}
             {articles && (
                 <LatestNewsContainer>
-                    {articles.slice(0, 4).map((article) => (
+                    {articles.map((article) => (
                         <StyledLatestNewsLink
                             key={article.id}
                             href={`/articles/${article.id}`}
