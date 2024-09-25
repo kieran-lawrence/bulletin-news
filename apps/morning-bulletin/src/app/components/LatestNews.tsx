@@ -18,7 +18,7 @@ export const LatestNews = () => {
     } = useGetArticlesQuery({ page_size: 4 })
     return (
         <SectionWrapperStyle>
-            <SectionHeader headerText="Latest News" showSeeMoreText />
+            <SectionHeader headerText="Latest News" />
             {isLoading && <Loader />}
             {articles && (
                 <LatestNewsContainer>
