@@ -14,10 +14,21 @@ export const publisherApi = createApi({
         getPublisherById: builder.query<Publisher, string>({
             query: (id) => `/${id}`,
         }),
+        postPublisher: builder.mutation<Publisher, Omit<Publisher, 'id'>>({
+            query: (publisher) => ({
+                url: '/',
+                method: 'POST',
+                body: publisher,
+            }),
+        }),
     }),
 })
 
-export const { useGetPublisherByIdQuery, useGetPublishersQuery } = publisherApi
+export const {
+    useGetPublisherByIdQuery,
+    useGetPublishersQuery,
+    usePostPublisherMutation,
+} = publisherApi
 
 interface PaginationParams {
     page?: number
