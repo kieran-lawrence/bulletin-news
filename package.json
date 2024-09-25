@@ -3,6 +3,7 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
+        "start:dev":"yarn start:backend & yarn start:bulletin",
         "start:bulletin": "yarn nx dev morning-bulletin",
         "start:backend": "yarn nx run bulletin-db:serve"
     },
