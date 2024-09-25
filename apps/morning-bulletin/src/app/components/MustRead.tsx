@@ -11,20 +11,29 @@ import { SectionWrapperStyle } from '../styles/shared'
 import styled from 'styled-components'
 import { Loader } from './Loader'
 
-export const MustRead = () => {
+type MustReadProps = {
+    showHeader?: boolean
+    flag?: string
+}
+export const MustRead = ({
+    showHeader = true,
+    flag = 'must-read',
+}: MustReadProps) => {
     const {
         data: articles,
         error,
         isLoading,
-    } = useGetArticlesByFlagQuery({ flag: 'must-read', page_size: 4 })
+    } = useGetArticlesByFlagQuery({ flag, page_size: 4 })
 
     return (
         <SectionWrapperStyle>
-            <SectionHeader
-                headerText="Must Read"
-                showSeeMoreText
-                href="/flags/must-read"
-            />
+            {showHeader && (
+                <SectionHeader
+                    headerText="Must Read"
+                    showSeeMoreText
+                    href="/flags/must-read"
+                />
+            )}
             <StyledMustReadWrapper>
                 {isLoading && <Loader />}
                 {articles &&

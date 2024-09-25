@@ -9,20 +9,32 @@ import { ArticleCategoryReadTime } from './ArticleCategoryReadTime'
 import styled from 'styled-components'
 import { Loader } from './Loader'
 
-export const EditorPick = () => {
-    const {
-        data: articles,
-        error,
-        isLoading,
-    } = useGetArticlesByFlagQuery({ flag: 'editors-pick', page_size: 5 })
+type EditorsPickProps = {
+    showHeader?: boolean
+    flag?: string
+    page?: number
+}
+
+export const EditorPick = ({
+    showHeader = true,
+    flag = 'editors-pick',
+    page = 1,
+}: EditorsPickProps) => {
+    const { data: articles, isLoading } = useGetArticlesByFlagQuery({
+        flag,
+        page_size: 5,
+        page,
+    })
 
     return (
         <SectionWrapperStyle>
-            <SectionHeader
-                headerText="Editors Pick"
-                showSeeMoreText
-                href="/flags/editors-pick"
-            />
+            {showHeader && (
+                <SectionHeader
+                    headerText="Editors Pick"
+                    showSeeMoreText
+                    href="/flags/editors-pick"
+                />
+            )}
             {isLoading && <Loader />}
             <EditorsPickWrapper>
                 {articles && (

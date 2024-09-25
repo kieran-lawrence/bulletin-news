@@ -51,14 +51,6 @@ const StyledPublisherWrapper = styled.div`
     &:hover {
         cursor: pointer;
     }
-    div {
-        background-image: linear-gradient(#e9353b, #ff7300);
-        width: 68px;
-        height: 68px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-    }
     p {
         font-size: 10px;
     }
