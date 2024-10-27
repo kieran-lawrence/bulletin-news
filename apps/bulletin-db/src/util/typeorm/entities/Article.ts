@@ -44,5 +44,5 @@ export class Article {
 
     @OneToMany(() => Comment, (comment) => comment.article)
     @JoinColumn()
-    comments: Comment
+    comments?: Comment
 }

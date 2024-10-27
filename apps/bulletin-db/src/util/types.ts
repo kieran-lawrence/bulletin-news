@@ -1,7 +1,7 @@
 export type ArticleSection = {
     kind: string
     text?: string
-    intentions: Intention[]
+    intentions?: Intention[]
     attribution?: string
     url?: string
 }
