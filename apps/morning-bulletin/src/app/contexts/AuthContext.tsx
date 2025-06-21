@@ -12,16 +12,10 @@ import { validateCookie } from '../utils/helpers'
 import { Loader } from '../components/Loader'
 import styled from 'styled-components'
 
-type InitialState = {
-    authLoading: true
-    user: undefined
+export type AuthContextType = {
+    authLoading: boolean
+    user: User | undefined
 }
-type LoadedState = {
-    authLoading: false
-    user: User
-}
-
-export type AuthContextType = LoadedState | InitialState
 
 const AuthContext = createContext<AuthContextType>({
     user: undefined,
@@ -31,7 +25,7 @@ const AuthContext = createContext<AuthContextType>({
 type Props = { children: ReactNode }
 export default function AuthContextProvider({ children }: Props) {
     const [getUserInfo] = useGetAccountMutation()
-    const [user, setUser] = useState<User>()
+    const [user, setUser] = useState<User | undefined>(undefined)
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         const token = validateCookie('TOKEN')
@@ -43,14 +37,24 @@ export default function AuthContextProvider({ children }: Props) {
                     setUser(userInfo)
                     setLoading(false)
                 })
+                .catch(() => {
+                    setUser(undefined)
+                    setLoading(false)
+                })
+        } else {
+            setUser(undefined)
+            setLoading(false)
         }
     }, [getUserInfo])
 
-    return !user || loading ? (
-        <LoadingWrapper>
-            <Loader />
-        </LoadingWrapper>
-    ) : (
+    if (loading) {
+        return (
+            <LoadingWrapper>
+                <Loader />
+            </LoadingWrapper>
+        )
+    }
+    return (
         <AuthContext.Provider value={{ user, authLoading: loading }}>
             {children}
         </AuthContext.Provider>
