@@ -7,29 +7,37 @@ import {
 export const commentApi = createApi({
     reducerPath: 'commentApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:3001/api/comment',
+        baseUrl: 'http://localhost:6688/comments',
     }),
     endpoints: (builder) => ({
         getCommentsByArticleId: builder.query<CommentType[], number>({
-            query: (articleId) => `/article/${articleId}`,
+            query: (articleId) => ({
+                url: `/${articleId}`,
+                headers: {
+                    //Authorization: `Bearer ${accessToken}`,
+                    'X-API-KEY': 'abracadabra',
+                },
+            }),
         }),
         postComment: builder.mutation<CommentType, CreateCommentDto>({
-            query: ({ accessToken, ...comment }) => ({
+            query: (comment) => ({
                 url: '/',
                 method: 'POST',
                 body: comment,
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
+                    //Authorization: `Bearer ${accessToken}`,
+                    'X-API-KEY': 'abracadabra',
                 },
             }),
         }),
         postCommentReply: builder.mutation<CommentType, CreateCommentReplyDto>({
-            query: ({ accessToken, ...reply }) => ({
-                url: '/reply',
+            query: ({ commentId, ...reply }) => ({
+                url: `${commentId}/reply`,
                 method: 'POST',
                 body: reply,
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
+                    //Authorization: `Bearer ${accessToken}`,
+                    'X-API-KEY': 'abracadabra',
                 },
             }),
         }),

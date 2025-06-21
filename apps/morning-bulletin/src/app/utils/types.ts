@@ -21,12 +21,18 @@ export type Article = {
 }
 export type Comment = {
     id: number
-    text: string
-    publishedAt: string
-    user: User
-    article: Article
+    parentId: number | null
+    parent: Comment | null
+    replies: Comment[]
+    content: string
     status: CommentStatus
-    thread: Thread
+    likeCount: number
+    createdAt: string
+    updatedAt: string
+    article: Article
+    articleId: number
+    author: User
+    authorId: number
 }
 export type Thread = {
     id: number
@@ -38,10 +44,9 @@ export type ThreadParticipant = {
 }
 export type User = {
     id: number
-    firstName: string
-    lastName: string
+    name: string
     email: string
-    dateOfBirth: string
+    dateOfBirth?: string
     role: UserRole
 }
 
@@ -50,10 +55,11 @@ export enum UserRole {
     MOD = 'moderator',
     ADMIN = 'administrator',
 }
-export enum CommentStatus {
-    LIVE = 'live',
-    DEAD = 'dead',
-}
+export type CommentStatus =
+    | 'PENDING' // New comment, awaiting review
+    | 'APPROVED' // Approved by a moderator
+    | 'REJECTED' // Reviewed and rejected by a moderator
+    | 'FLAGGED' // Community flagged, needs review by a moderator
 
 export declare type Intention = Link | Emphasis | Important | Text
 export declare type ArticleSection =
@@ -109,16 +115,14 @@ export interface HeadingSection extends ArticleSections {
     text: string
 }
 export type CreateCommentDto = {
-    text: string
-    publishedAt: string
+    content: string
     articleId: number
-    accessToken: string
+    authorId: number
 }
 
 export type CreateCommentReplyDto = {
-    text: string
-    publishedAt: string
+    commentId: number
+    content: string
     articleId: number
-    threadId: number
-    accessToken: string
+    authorId: number
 }

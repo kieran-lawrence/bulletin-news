@@ -13,6 +13,7 @@ interface CreateCommentFormProps {
 }
 interface CreateCommentProps {
     articleId: number
+    authorId?: number
     onCreateComment: () => void
     isReplying?: boolean
     replyingTo?: string
@@ -21,6 +22,7 @@ interface CreateCommentProps {
 
 export const CreateComment = ({
     articleId,
+    authorId,
     onCreateComment,
     isReplying = false,
     replyingTo,
@@ -32,15 +34,14 @@ export const CreateComment = ({
         usePostCommentReplyMutation()
     const onSubmit: SubmitHandler<CreateCommentFormProps> = (data) => {
         const accessToken = validateCookie('TOKEN')
-        if (!accessToken) return
+        if (!accessToken || !authorId) return
 
         if (isReplying && threadId) {
             const reply: CreateCommentReplyDto = {
-                text: data.text,
+                content: data.text,
                 articleId,
-                publishedAt: new Date().toISOString(),
-                accessToken,
-                threadId,
+                commentId: threadId,
+                authorId,
             }
             createReply(reply).then(() => {
                 reset()
@@ -48,10 +49,9 @@ export const CreateComment = ({
             })
         } else {
             const comment: CreateCommentDto = {
-                text: data.text,
+                content: data.text,
                 articleId,
-                publishedAt: new Date().toISOString(),
-                accessToken,
+                authorId,
             }
             createComment(comment).then(() => {
                 reset()

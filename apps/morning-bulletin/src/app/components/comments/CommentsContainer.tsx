@@ -6,11 +6,13 @@ import { useGetCommentsByArticleIdQuery } from '../../utils/store/comment'
 import { FullScreenLoaderWrapper } from '../../styles/shared'
 import { Loader } from '../Loader'
 import Link from 'next/link'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface CommentsContainerProps {
     articleId: number
 }
 export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
+    const { user } = useAuth()
     const {
         data: comments,
         isLoading,
@@ -29,7 +31,11 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
                 <Link href="/terms-of-service">community guidelines</Link> for
                 more information.
             </CommentDisclaimer>
-            <CreateComment articleId={articleId} onCreateComment={refetch} />
+            <CreateComment
+                articleId={articleId}
+                authorId={user?.id}
+                onCreateComment={refetch}
+            />
             {comments && comments.length > 0 ? (
                 <CommentsSection
                     comments={comments}
