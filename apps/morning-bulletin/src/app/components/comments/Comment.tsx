@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Comment as CommentType, User } from '../../utils/types'
 import styled from 'styled-components'
 import { formatDistance } from 'date-fns'
@@ -92,7 +92,7 @@ const Comment = ({
                             {getShortenedName(comment.parent.author)}
                         </span>
                     )}
-                    {comment.content}
+                    <div>{renderRichText(comment.content)}</div>
                     {/* Contains the reply, report etc actions a user can take */}
                     <CommentActions>
                         <IconContext.Provider
@@ -213,3 +213,85 @@ const CommentActions = styled.div`
         padding-right: 4px;
     }
 `
+
+export const renderRichText = (input: string): ReactNode[] => {
+    const paragraphs = input.split(/\n/) // Handle new lines as paragraph breaks
+
+    // Loops over each paragraph and renders it as a <p> element
+    return paragraphs.map((paragraph, index) => (
+        <p key={index}>{renderInlineElements(paragraph)}</p>
+    ))
+}
+
+// Define the inline rules for rendering rich text, converts inline markdown-like syntax to HTML elements
+const INLINE_RULES = [
+    {
+        regex: /\*\*(.+?)\*\*/, // Filters on **text** (used for bold)
+        render: (m: string, i: number) => <strong key={i}>{m}</strong>,
+    },
+    {
+        regex: /__(.+?)__/, // Filters on __text__ (used for italic)
+        render: (m: string, i: number) => <em key={i}>{m}</em>,
+    },
+    {
+        regex: /~~(.+?)~~/, // Filters on ~~text~~ (used for strikethrough)
+        render: (m: string, i: number) => <s key={i}>{m}</s>,
+    },
+    {
+        regex: /\+\+(.+?)\+\+/, // Filters on ++text++ (used for underline)
+        render: (m: string, i: number) => <u key={i}>{m}</u>,
+    },
+]
+
+type MatchRule = {
+    /** Starting index of the matched block  */
+    index: number
+    /** Length of the matched block */
+    length: number
+    /** Function that returns a ReactNode, used to render the matched text when invoked */
+    render: () => ReactNode
+}
+const renderInlineElements = (text: string): ReactNode[] => {
+    let elements: ReactNode[] = []
+    let remainingText = text
+    let i = 0
+
+    // While there is still text to process, find the earliest match of any inline rule
+    while (remainingText.length > 0) {
+        let earliestMatch: MatchRule | null = null
+
+        // Loop through each inline rule to find a matching pattern
+        for (const rule of INLINE_RULES) {
+            // Returns the first match of the current rule in the remaining text
+            const match = rule.regex.exec(remainingText)
+            if (
+                match &&
+                (earliestMatch === null || match.index < earliestMatch.index)
+            ) {
+                // If a match is found, create a MatchRule object with the index, length, and render function
+                earliestMatch = {
+                    index: match.index,
+                    length: match[0].length,
+                    render: () => rule.render(match[1]!, i++),
+                }
+            }
+        }
+
+        // Check if an earliest match was found, if so, push the text before the match and the rendered element to the elements array
+        if (earliestMatch) {
+            if (earliestMatch.index > 0) {
+                elements.push(remainingText.slice(0, earliestMatch.index))
+            }
+            elements.push(earliestMatch.render())
+            remainingText = remainingText.slice(
+                earliestMatch.index + earliestMatch.length,
+            )
+        } else {
+            // If no match was found, push the remaining text as a plain text element
+            elements.push(remainingText)
+            break
+        }
+    }
+
+    return elements
+}
