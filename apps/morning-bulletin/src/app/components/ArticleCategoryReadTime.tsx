@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { CommentCount } from './CommentCount'
 
 type Props = {
     categoryTextColor?: string
@@ -7,6 +8,7 @@ type Props = {
     fontSize?: string
     fontColor?: string
     bold?: boolean
+    articleId?: number
 }
 export const ArticleCategoryReadTime = ({
     categoryTextColor,
@@ -15,6 +17,7 @@ export const ArticleCategoryReadTime = ({
     fontSize,
     fontColor,
     bold,
+    articleId,
 }: Props) => {
     return (
         <StyledArticleTitle
@@ -24,6 +27,7 @@ export const ArticleCategoryReadTime = ({
             $bold={bold}
         >
             <span>{articleCategory}</span> • {articleReadTime} min read
+            {articleId && <CommentCount articleId={articleId} />}
         </StyledArticleTitle>
     )
 }
@@ -34,6 +38,8 @@ const StyledArticleTitle = styled.div<{
     $bold?: boolean
     $categoryTextColor?: string
 }>`
+    display: flex;
+    align-items: center;
     font-size: ${(props) => props.$fontSize || '16px'};
     color: ${(props) => props.$fontColor || '#3c3c3c'};
 

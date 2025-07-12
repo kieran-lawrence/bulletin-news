@@ -48,6 +48,7 @@ export const CategoriesPage = ({ category }: CategoriesProps) => {
                                 articleCategory={article.category}
                                 articleReadTime={article.readTime}
                                 fontSize="11px"
+                                articleId={article.id}
                             />
                         </ArticleWrapper>
                     ))}

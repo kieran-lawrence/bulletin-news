@@ -84,6 +84,7 @@ export const MustRead = ({
                                     fontColor={
                                         index === 1 ? '#f1f1f1' : undefined
                                     }
+                                    articleId={article.id}
                                 />
                             </div>
                         </StyledMustReadCard>

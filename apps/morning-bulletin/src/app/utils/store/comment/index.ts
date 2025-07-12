@@ -14,7 +14,14 @@ export const commentApi = createApi({
             query: (articleId) => ({
                 url: `/${articleId}`,
                 headers: {
-                    //Authorization: `Bearer ${accessToken}`,
+                    'X-API-KEY': 'abracadabra',
+                },
+            }),
+        }),
+        getCommentsCount: builder.query<{ count: number }, number>({
+            query: (articleId) => ({
+                url: `http://localhost:6688/articles/${articleId}/count`,
+                headers: {
                     'X-API-KEY': 'abracadabra',
                 },
             }),
@@ -25,7 +32,6 @@ export const commentApi = createApi({
                 method: 'POST',
                 body: comment,
                 headers: {
-                    //Authorization: `Bearer ${accessToken}`,
                     'X-API-KEY': 'abracadabra',
                 },
             }),
@@ -36,7 +42,6 @@ export const commentApi = createApi({
                 method: 'POST',
                 body: reply,
                 headers: {
-                    //Authorization: `Bearer ${accessToken}`,
                     'X-API-KEY': 'abracadabra',
                 },
             }),
@@ -45,6 +50,7 @@ export const commentApi = createApi({
 })
 export const {
     useGetCommentsByArticleIdQuery,
+    useGetCommentsCountQuery,
     usePostCommentMutation,
     usePostCommentReplyMutation,
 } = commentApi

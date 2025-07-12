@@ -67,6 +67,7 @@ export const EditorPick = ({
                                 articleReadTime={articles[0].readTime}
                                 fontSize="11px"
                                 fontColor="#f1f1f1"
+                                articleId={articles[0].id}
                             />
                         </div>
                     </EditorsPickItem>
@@ -98,6 +99,7 @@ export const EditorPick = ({
                                 articleCategory={article.category}
                                 articleReadTime={article.readTime}
                                 fontSize="11px"
+                                articleId={article.id}
                             />
                         </EditorsPickItem>
                     ))}
