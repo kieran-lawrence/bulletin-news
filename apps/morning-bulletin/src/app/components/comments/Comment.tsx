@@ -4,10 +4,14 @@ import styled from 'styled-components'
 import { formatDistance } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
 import { userIsAdmin, userIsModerator } from '../../utils/helpers'
-import { FaReply, FaFlag, FaTrash } from 'react-icons/fa'
+import { FaReply, FaFlag, FaThumbsUp } from 'react-icons/fa'
 import { IconContext } from 'react-icons'
 import { CreateComment } from './CreateComment'
 import { getInitials, getShortenedName } from '../../utils/utils'
+import {
+    usePostCommentLikeMutation,
+    usePostStatusUpdateMutation,
+} from '../../utils/store/comment'
 
 interface CommentsSectionProps {
     comments: CommentType[]
@@ -64,11 +68,56 @@ const Comment = ({
     const userInitials = getInitials(author.name)
     const [isReplying, setIsReplying] = useState(false)
     const isAuthor = user?.email === author.email
+    const [hasLikedComment, setHasLikedComment] = useState(
+        () =>
+            comment.likes?.some((like) => like.user?.email === user?.email) ||
+            false,
+    )
+    const [hasReportedComment, setHasReportedComment] = useState(
+        () =>
+            comment.flags?.some((flag) => flag.user?.email === user?.email) ||
+            false,
+    )
+    const [likeCount, setLikeCount] = useState(comment.likeCount)
     const replyingTo = getShortenedName(comment.author)
+    const [likeComment] = usePostCommentLikeMutation()
+    const [reportComment] = usePostStatusUpdateMutation()
 
     const handleReply = () => {
         onCreateComment()
         setIsReplying(false)
+    }
+    const handleReport = () => {
+        if (hasReportedComment) {
+            return
+        }
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+        reportComment({
+            commentId: comment.id,
+            status: 'FLAGGED',
+            email: user.email, // We use email because bulletin doesn't use auth0 like the comments system does so we don't have a shared userid
+        }).then(() => {
+            setHasReportedComment(true)
+        })
+    }
+    const handleLike = () => {
+        if (hasLikedComment) {
+            return
+        }
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+        likeComment({
+            commentId: comment.id,
+            email: user.email,
+        }).then(() => {
+            setHasLikedComment(true)
+            setLikeCount((prev) => prev + 1)
+        })
     }
 
     return (
@@ -76,16 +125,27 @@ const Comment = ({
             <CommentWrapper $hasAdditionalPadding={isFirstInThread}>
                 <CommentAvatar>{userInitials}</CommentAvatar>
                 <CommentContentWrapper>
-                    <CommentAuthor>
-                        {getShortenedName(comment.author)}
-                        <time dateTime={comment.createdAt}>
-                            {formatDistance(
-                                new Date(comment.createdAt),
-                                new Date(),
-                                { addSuffix: true },
+                    <div className="commentHeader">
+                        <CommentAuthor>
+                            {getShortenedName(comment.author)}
+                            {['ADMIN', 'MODERATOR'].includes(
+                                comment.author.role,
+                            ) && <span className="userRole">STAFF</span>}
+                            <time dateTime={comment.createdAt}>
+                                {formatDistance(
+                                    new Date(comment.createdAt),
+                                    new Date(),
+                                    { addSuffix: true },
+                                )}
+                            </time>
+                        </CommentAuthor>
+                        {user &&
+                            (userIsModerator(user) || userIsAdmin(user)) && (
+                                <CommentModerationButton>
+                                    Moderate
+                                </CommentModerationButton>
                             )}
-                        </time>
-                    </CommentAuthor>
+                    </div>
                     {comment.parent && (
                         <span className="replyingTo">
                             in reply to{' '}
@@ -99,27 +159,35 @@ const Comment = ({
                             value={{ className: 'commentActionIcons' }}
                         >
                             {!isAuthor && (
-                                <div
+                                <button
                                     className="commentAction"
                                     onClick={() => setIsReplying(!isReplying)}
                                 >
                                     <FaReply />
                                     Reply
-                                </div>
+                                </button>
                             )}
                             {!isAuthor && (
-                                <div className="commentAction">
-                                    <FaFlag /> Report
-                                </div>
+                                <button
+                                    className={`commentAction ${
+                                        hasReportedComment && 'active'
+                                    }`}
+                                    onClick={handleReport}
+                                >
+                                    <FaFlag />{' '}
+                                    {hasReportedComment ? 'Reported' : 'Report'}
+                                </button>
                             )}
-                            {user &&
-                                (userIsModerator(user) ||
-                                    userIsAdmin(user)) && (
-                                    <div className="commentAction">
-                                        <FaTrash />
-                                        Delete
-                                    </div>
-                                )}
+                            {!isAuthor && (
+                                <button
+                                    className={`commentAction ${
+                                        hasLikedComment && 'active'
+                                    }`}
+                                    onClick={handleLike}
+                                >
+                                    <FaThumbsUp /> Like {likeCount}
+                                </button>
+                            )}
                         </IconContext.Provider>
                     </CommentActions>
                 </CommentContentWrapper>
@@ -128,7 +196,7 @@ const Comment = ({
             {isReplying && (
                 <CreateComment
                     articleId={comment.articleId}
-                    authorId={user?.id}
+                    authorEmail={user?.email}
                     onCreateComment={handleReply}
                     isReplying={isReplying}
                     replyingTo={replyingTo}
@@ -144,7 +212,7 @@ const CommentContainer = styled.div`
     border-bottom: 1px solid #6565659f;
     padding: 16px 0;
 
-    &:last-child {
+    &:last-of-type {
         border-bottom: none;
     }
 `
@@ -154,7 +222,7 @@ const CommentWrapper = styled.div<{ $hasAdditionalPadding?: boolean }>`
     gap: 8px;
 
     padding: ${(props) =>
-        props.$hasAdditionalPadding ? '16px 64px' : '16px 0'};
+        props.$hasAdditionalPadding ? '16px 0 16px 32px' : '16px 0'};
 `
 const CommentAvatar = styled.div`
     width: 48px;
@@ -178,8 +246,17 @@ const CommentContentWrapper = styled.div`
         font-weight: 400;
         font-style: italic;
     }
+    .commentHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding-bottom: 2px;
+    }
 `
 const CommentAuthor = styled.address`
+    display: flex;
+    align-items: center;
     font-size: 18px;
     font-weight: 600;
     font-style: normal;
@@ -190,21 +267,54 @@ const CommentAuthor = styled.address`
         font-weight: 400;
         color: #7a7a7a;
     }
+    .userRole {
+        margin-left: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        font-weight: 400;
+        color: #7a7a7a;
+        border: 1px solid #7a7a7a;
+        border-radius: 4px;
+        padding: 1px 4px;
+    }
+`
+const CommentModerationButton = styled.button`
+    background: none;
+    border: 1px solid #7a7a7a;
+    font-size: 14px;
+    color: #7a7a7a;
+    border-radius: 4px;
+    padding: 4px 8px;
+    &:hover {
+        cursor: pointer;
+        color: #e9353b;
+    }
+    &.active {
+        color: #e9353b;
+    }
 `
 const CommentActions = styled.div`
     display: flex;
-    justify-content: space-between;
+    flex: 1;
+    width: 100%;
     align-items: center;
+    gap: 16px;
     font-size: 15px;
     color: #7a7a7a;
-    width: 40%;
     padding-top: 8px;
     .commentAction {
         display: flex;
         align-items: center;
+        background: none;
+        border: none;
+        font-size: inherit;
+        color: inherit;
         &:hover {
             cursor: pointer;
             text-decoration: underline;
+            color: #e9353b;
+        }
+        &.active {
             color: #e9353b;
         }
     }

@@ -7,12 +7,12 @@ import {
 export const commentApi = createApi({
     reducerPath: 'commentApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:6688/comments',
+        baseUrl: 'http://localhost:6688',
     }),
     endpoints: (builder) => ({
         getCommentsByArticleId: builder.query<CommentType[], number>({
             query: (articleId) => ({
-                url: `/${articleId}`,
+                url: `/comments/${articleId}`,
                 headers: {
                     'X-API-KEY': 'abracadabra',
                 },
@@ -20,7 +20,7 @@ export const commentApi = createApi({
         }),
         getCommentsCount: builder.query<{ count: number }, number>({
             query: (articleId) => ({
-                url: `http://localhost:6688/articles/${articleId}/count`,
+                url: `/articles/${articleId}/count`,
                 headers: {
                     'X-API-KEY': 'abracadabra',
                 },
@@ -28,7 +28,7 @@ export const commentApi = createApi({
         }),
         postComment: builder.mutation<CommentType, CreateCommentDto>({
             query: (comment) => ({
-                url: '/',
+                url: '/comments',
                 method: 'POST',
                 body: comment,
                 headers: {
@@ -38,9 +38,37 @@ export const commentApi = createApi({
         }),
         postCommentReply: builder.mutation<CommentType, CreateCommentReplyDto>({
             query: ({ commentId, ...reply }) => ({
-                url: `${commentId}/reply`,
+                url: `/comments/${commentId}/reply`,
                 method: 'POST',
                 body: reply,
+                headers: {
+                    'X-API-KEY': 'abracadabra',
+                },
+            }),
+        }),
+        postCommentLike: builder.mutation<
+            void,
+            { commentId: number; email: string }
+        >({
+            query: ({ commentId, email }) => ({
+                url: `/comments/${commentId}/like`,
+                method: 'POST',
+                headers: {
+                    'X-API-KEY': 'abracadabra',
+                },
+                body: {
+                    email,
+                },
+            }),
+        }),
+        postStatusUpdate: builder.mutation<
+            void,
+            { commentId: number; status: 'FLAGGED'; email: string } // Update as needed for other statuses
+        >({
+            query: ({ commentId, status, email }) => ({
+                url: `/comments/${commentId}/status`,
+                method: 'PATCH',
+                body: { status, changedByEmail: email },
                 headers: {
                     'X-API-KEY': 'abracadabra',
                 },
@@ -53,4 +81,6 @@ export const {
     useGetCommentsCountQuery,
     usePostCommentMutation,
     usePostCommentReplyMutation,
+    usePostCommentLikeMutation,
+    usePostStatusUpdateMutation,
 } = commentApi

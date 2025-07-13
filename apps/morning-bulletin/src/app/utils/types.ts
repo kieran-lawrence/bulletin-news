@@ -27,12 +27,15 @@ export type Comment = {
     content: string
     status: CommentStatus
     likeCount: number
+    flaggedCount: number
     createdAt: string
     updatedAt: string
     article: Article
     articleId: number
     author: User
     authorId: number
+    likes?: CommentLike[]
+    flags?: CommentFlag[]
 }
 export type Thread = {
     id: number
@@ -48,6 +51,24 @@ export type User = {
     email: string
     dateOfBirth?: string
     role: UserRole
+}
+
+export type CommentLike = {
+    id: number
+    userId: string
+    commentId: number
+    createdAt: string
+    comment?: Comment
+    user?: User
+}
+
+export type CommentFlag = {
+    id: number
+    userId: string
+    commentId: number
+    createdAt: string
+    comment?: Comment
+    user?: User
 }
 
 export enum UserRole {
@@ -117,12 +138,12 @@ export interface HeadingSection extends ArticleSections {
 export type CreateCommentDto = {
     content: string
     articleId: number
-    authorId: number
+    authorEmail: string
 }
 
 export type CreateCommentReplyDto = {
     commentId: number
     content: string
     articleId: number
-    authorId: number
+    authorEmail: string
 }

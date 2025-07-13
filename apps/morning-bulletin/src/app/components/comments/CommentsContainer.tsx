@@ -23,7 +23,7 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
             <Loader />
         </FullScreenLoaderWrapper>
     ) : (
-        <StyledCommentsContainer>
+        <StyledCommentsContainer id="commentsContainer">
             <CommentDisclaimer>
                 Bulletin reserves the right to remove any comment that is deemed
                 inappropriate. <br />
@@ -33,7 +33,7 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
             </CommentDisclaimer>
             <CreateComment
                 articleId={articleId}
-                authorId={user?.id}
+                authorEmail={user?.email}
                 onCreateComment={refetch}
             />
             {comments && comments.length > 0 ? (
@@ -44,6 +44,10 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
             ) : (
                 <NoCommentsYet />
             )}
+            <CommentActions>
+                <Link href="#commentsContainer">Top of Comments</Link>
+                <Link href="#articlePage">Top of Page</Link>
+            </CommentActions>
         </StyledCommentsContainer>
     )
 }
@@ -63,5 +67,20 @@ const CommentDisclaimer = styled.span`
 
     a {
         color: #e50914;
+    }
+`
+const CommentActions = styled.span`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    a {
+        font-size: 14px;
+        color: #e50914;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 `

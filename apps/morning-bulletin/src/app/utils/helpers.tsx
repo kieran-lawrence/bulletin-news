@@ -168,7 +168,7 @@ export const validateCookie = (key: string): string | undefined => {
     return
 }
 export const userIsModerator = (user: User): boolean => {
-    return user.role === UserRole.MOD
+    return user.role.toLowerCase() === UserRole.MOD
 }
 export const userIsAdmin = (user: User): boolean => {
     return user.role === UserRole.ADMIN

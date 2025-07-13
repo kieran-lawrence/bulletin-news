@@ -26,7 +26,7 @@ export const ArticlePage = ({ id }: ArticleProps) => {
 
     const isLoading = trendingArticlesLoading || articlesLoading
     return (
-        <StyledArticleContainer>
+        <StyledArticleContainer id="articlePage">
             {isLoading && <Loader />}
             {article && (
                 <>
