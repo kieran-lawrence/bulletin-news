@@ -45,7 +45,11 @@ export const CreateComment = ({
                 authorEmail,
             }
             createReply(reply).catch(() => setHasError(true))
-            setIsReplying?.(false)
+
+            setShowPendingModal(true)
+            setTimeout(() => {
+                setIsReplying?.(false)
+            }, 2000)
         } else {
             const comment: CreateCommentDto = {
                 content: parsedComment,
@@ -53,6 +57,7 @@ export const CreateComment = ({
                 authorEmail,
             }
             createComment(comment).catch(() => setHasError(true))
+            setShowPendingModal(true)
         }
     }
 
