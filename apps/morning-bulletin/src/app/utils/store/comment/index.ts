@@ -63,12 +63,25 @@ export const commentApi = createApi({
         }),
         postStatusUpdate: builder.mutation<
             void,
-            { commentId: number; status: 'FLAGGED'; email: string } // Update as needed for other statuses
+            { commentId: number; status: 'FLAGGED' | 'REJECTED'; email: string } // Update as needed for other statuses
         >({
             query: ({ commentId, status, email }) => ({
                 url: `/comments/${commentId}/status`,
                 method: 'PATCH',
                 body: { status, changedByEmail: email },
+                headers: {
+                    'X-API-KEY': 'abracadabra',
+                },
+            }),
+        }),
+        postCommentUpdate: builder.mutation<
+            CommentType,
+            { commentId: number; content: string; email: string }
+        >({
+            query: ({ commentId, content, email }) => ({
+                url: `/comments/${commentId}`,
+                method: 'PATCH',
+                body: { content, userEmail: email },
                 headers: {
                     'X-API-KEY': 'abracadabra',
                 },
@@ -83,4 +96,5 @@ export const {
     usePostCommentReplyMutation,
     usePostCommentLikeMutation,
     usePostStatusUpdateMutation,
+    usePostCommentUpdateMutation,
 } = commentApi

@@ -1,21 +1,19 @@
-import { SubmitHandler, useForm } from 'react-hook-form'
 import styled from 'styled-components'
-import { BulletinButton, BulletTextInput } from '../../styles/shared'
 import { CreateCommentDto, CreateCommentReplyDto } from '../../utils/types'
 import { validateCookie } from '../../utils/helpers'
 import {
     usePostCommentMutation,
     usePostCommentReplyMutation,
 } from '../../utils/store/comment'
+import React from 'react'
+import { RichTextInput } from './RichText'
+import { Descendant } from 'slate'
 
-interface CreateCommentFormProps {
-    text: string
-}
 interface CreateCommentProps {
     articleId: number
     authorEmail?: string
-    onCreateComment: () => void
     isReplying?: boolean
+    setIsReplying?: (isReplying: boolean) => void
     replyingTo?: string
     threadId?: number
 }
@@ -23,68 +21,62 @@ interface CreateCommentProps {
 export const CreateComment = ({
     articleId,
     authorEmail,
-    onCreateComment,
+    setIsReplying,
     isReplying = false,
     replyingTo,
     threadId,
 }: CreateCommentProps) => {
-    const { register, handleSubmit, reset } = useForm<CreateCommentFormProps>()
-    const [createComment, { isLoading }] = usePostCommentMutation()
-    const [createReply, { isLoading: loadingReplies }] =
-        usePostCommentReplyMutation()
-    const onSubmit: SubmitHandler<CreateCommentFormProps> = (data) => {
+    const [createComment] = usePostCommentMutation()
+    const [createReply] = usePostCommentReplyMutation()
+
+    const onSubmit = (data: Descendant[]) => {
         const accessToken = validateCookie('TOKEN')
         if (!accessToken || !authorEmail) return
 
+        const parsedComment = JSON.stringify(data)
         if (isReplying && threadId) {
             const reply: CreateCommentReplyDto = {
-                content: data.text,
+                content: parsedComment,
                 articleId,
                 commentId: threadId,
                 authorEmail,
             }
-            createReply(reply).then(() => {
-                reset()
-                onCreateComment()
-            })
+            createReply(reply)
+            setIsReplying?.(false)
         } else {
             const comment: CreateCommentDto = {
-                content: data.text,
+                content: parsedComment,
                 articleId,
                 authorEmail,
             }
-            createComment(comment).then(() => {
-                reset()
-                onCreateComment()
-            })
+            createComment(comment)
         }
     }
     return (
         <CreateCommentWrapper>
-            {isReplying && <span>Replying to {replyingTo}</span>}
-            <CreateCommentForm onSubmit={handleSubmit(onSubmit)}>
-                <BulletTextInput
-                    type="text"
-                    placeholder="Write a comment"
-                    $width="100%"
-                    {...register('text', { required: true })}
-                />
-                <BulletinButton type="submit">
-                    {isLoading || loadingReplies ? '...' : 'Send'}
-                </BulletinButton>
-            </CreateCommentForm>
+            <RichTextInput
+                initialValue={[
+                    {
+                        type: 'paragraph',
+                        children: [{ text: '' }],
+                    },
+                ]}
+                readOnly={false}
+                showToolbar={true}
+                onSubmit={onSubmit}
+                replyingTo={replyingTo}
+                mode="comment"
+            />
         </CreateCommentWrapper>
     )
 }
 
-const CreateCommentForm = styled.form`
-    display: flex;
-    gap: 8px;
-`
-const CreateCommentWrapper = styled.div`
-    padding: 8px;
-
-    span {
+// Wrapper around the RichTextInput to apply styles
+export const CreateCommentWrapper = styled.div`
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    .replyingTo {
         background: #dfdfdf;
         width: max-content;
         display: block;
@@ -93,5 +85,12 @@ const CreateCommentWrapper = styled.div`
         border-top-right-radius: 5px;
         border-top-left-radius: 5px;
         box-sizing: border-box;
+    }
+    .editorContainer > .richTextEditor {
+        flex: 1;
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid #6565659f;
+        border-radius: 4px;
     }
 `

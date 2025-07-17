@@ -31,15 +31,12 @@ export const CommentsContainer = ({ articleId }: CommentsContainerProps) => {
                 <Link href="/terms-of-service">community guidelines</Link> for
                 more information.
             </CommentDisclaimer>
-            <CreateComment
-                articleId={articleId}
-                authorEmail={user?.email}
-                onCreateComment={refetch}
-            />
+            {/* The initial comment input, that shows above all comments */}
+            <CreateComment articleId={articleId} authorEmail={user?.email} />
             {comments && comments.length > 0 ? (
                 <CommentsSection
                     comments={comments}
-                    onCreateComment={refetch}
+                    refetchComments={refetch}
                 />
             ) : (
                 <NoCommentsYet />

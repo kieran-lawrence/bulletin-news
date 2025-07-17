@@ -1,5 +1,9 @@
-import React, { ReactNode, useState } from 'react'
-import { Comment as CommentType, User } from '../../utils/types'
+import React, { useState } from 'react'
+import {
+    Comment as CommentType,
+    CreateCommentReplyDto,
+    User,
+} from '../../utils/types'
 import styled from 'styled-components'
 import { formatDistance } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
@@ -10,24 +14,29 @@ import { CreateComment } from './CreateComment'
 import { getInitials, getShortenedName } from '../../utils/utils'
 import {
     usePostCommentLikeMutation,
+    usePostCommentReplyMutation,
+    usePostCommentUpdateMutation,
     usePostStatusUpdateMutation,
 } from '../../utils/store/comment'
+import { FaPencil } from 'react-icons/fa6'
+import { RichTextInput } from './RichText'
+import { Descendant } from 'slate'
 
 interface CommentsSectionProps {
     comments: CommentType[]
-    onCreateComment: () => void
+    refetchComments: () => void
 }
 interface CommentProps {
     comment: CommentType
     isFirstInThread?: boolean
     author: User
-    onCreateComment: () => void
+    refetchComments: () => void
 }
 
 type ByParent = Record<number, CommentType[]>
 export const CommentsSection = ({
     comments,
-    onCreateComment,
+    refetchComments,
 }: CommentsSectionProps) => {
     // Record to hold comments grouped by parent ID
     const byParent: ByParent = {}
@@ -49,7 +58,7 @@ export const CommentsSection = ({
                     comment={comment}
                     isFirstInThread={!!comment.parent}
                     author={comment.author}
-                    onCreateComment={onCreateComment}
+                    refetchComments={refetchComments}
                 />
                 {renderTree(comment.id)}
             </React.Fragment>
@@ -62,7 +71,7 @@ const Comment = ({
     comment,
     isFirstInThread,
     author,
-    onCreateComment,
+    refetchComments,
 }: CommentProps) => {
     const { user } = useAuth()
     const userInitials = getInitials(author.name)
@@ -78,14 +87,40 @@ const Comment = ({
             comment.flags?.some((flag) => flag.user?.email === user?.email) ||
             false,
     )
+    const [isEditing, setIsEditing] = useState(false)
+
     const [likeCount, setLikeCount] = useState(comment.likeCount)
     const replyingTo = getShortenedName(comment.author)
     const [likeComment] = usePostCommentLikeMutation()
-    const [reportComment] = usePostStatusUpdateMutation()
+    const [updateCommentStatus] = usePostStatusUpdateMutation()
+    const [updateComment] = usePostCommentUpdateMutation()
+    const [createReply] = usePostCommentReplyMutation()
 
-    const handleReply = () => {
-        onCreateComment()
+    // Moderation dropdown state
+    const [showModerationMenu, setShowModerationMenu] = useState(false)
+
+    const handleReply = (textBlocks: Descendant[]) => {
+        const reply: CreateCommentReplyDto = {
+            content: JSON.stringify(textBlocks),
+            commentId: comment.id,
+            articleId: comment.articleId,
+            authorEmail: user?.email || '',
+        }
+        createReply(reply)
         setIsReplying(false)
+    }
+    const handleCommentUpdate = (textBlocks: Descendant[]) => {
+        const content = JSON.stringify(textBlocks)
+        updateComment({
+            commentId: comment.id,
+            content,
+            email: user?.email || '',
+        }).then(() => {
+            setIsEditing(false)
+            setTimeout(() => {
+                refetchComments()
+            }, 1000)
+        })
     }
     const handleReport = () => {
         if (hasReportedComment) {
@@ -95,7 +130,7 @@ const Comment = ({
             console.warn('User not logged in')
             return
         }
-        reportComment({
+        updateCommentStatus({
             commentId: comment.id,
             status: 'FLAGGED',
             email: user.email, // We use email because bulletin doesn't use auth0 like the comments system does so we don't have a shared userid
@@ -120,6 +155,35 @@ const Comment = ({
         })
     }
 
+    // Moderation actions
+    const handleReject = () => {
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+
+        updateCommentStatus({
+            commentId: comment.id,
+            status: 'REJECTED',
+            email: user.email,
+        }).then(() => {
+            setTimeout(() => {
+                refetchComments()
+            }, 1000)
+        })
+        setShowModerationMenu(false)
+    }
+
+    // Close menu on click outside
+    React.useEffect(() => {
+        if (!showModerationMenu) return
+        const handleClick = (e: MouseEvent) => {
+            setShowModerationMenu(false)
+        }
+        document.addEventListener('click', handleClick)
+        return () => document.removeEventListener('click', handleClick)
+    }, [showModerationMenu])
+
     return (
         <CommentContainer>
             <CommentWrapper $hasAdditionalPadding={isFirstInThread}>
@@ -141,9 +205,39 @@ const Comment = ({
                         </CommentAuthor>
                         {user &&
                             (userIsModerator(user) || userIsAdmin(user)) && (
-                                <CommentModerationButton>
-                                    Moderate
-                                </CommentModerationButton>
+                                <div style={{ position: 'relative' }}>
+                                    <CommentModerationButton
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setShowModerationMenu((v) => !v)
+                                        }}
+                                        aria-haspopup="true"
+                                        aria-expanded={showModerationMenu}
+                                    >
+                                        Moderate
+                                    </CommentModerationButton>
+                                    {showModerationMenu && (
+                                        <ModerationDropdownMenu
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <button onClick={handleReject}>
+                                                Reject
+                                            </button>
+                                            {/* TODO: Update to use correct URL based on env */}
+                                            <a
+                                                href={`http://localhost:5173/moderate#commentCard-${comment.id}`}
+                                            >
+                                                View in Dashboard
+                                            </a>
+                                            {/* TODO: This anchor doesn't exist on the comments dashboard yet */}
+                                            <a
+                                                href={`http://localhost:5173/users#userCard-${comment.id}`}
+                                            >
+                                                Manage User
+                                            </a>
+                                        </ModerationDropdownMenu>
+                                    )}
+                                </div>
                             )}
                     </div>
                     {comment.parent && (
@@ -152,7 +246,44 @@ const Comment = ({
                             {getShortenedName(comment.parent.author)}
                         </span>
                     )}
-                    <div>{renderRichText(comment.content)}</div>
+                    <CommentContentContainer
+                        className={isEditing ? 'editing' : ''}
+                    >
+                        <>
+                            {/* This is the input that displays the users comment.  */}
+                            <RichTextInput
+                                onSubmit={
+                                    isEditing
+                                        ? handleCommentUpdate
+                                        : handleReply
+                                }
+                                readOnly={!isEditing}
+                                showToolbar={isEditing}
+                                initialValue={JSON.parse(comment.content)}
+                                mode="edit"
+                            />
+                            {isEditing ? (
+                                <small className="editActions">
+                                    <a
+                                        role="button"
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        cancel
+                                    </a>
+                                </small>
+                            ) : (
+                                isAuthor && (
+                                    <button
+                                        className="editButton"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <FaPencil />
+                                        Edit
+                                    </button>
+                                )
+                            )}
+                        </>
+                    </CommentContentContainer>
                     {/* Contains the reply, report etc actions a user can take */}
                     <CommentActions>
                         <IconContext.Provider
@@ -192,15 +323,15 @@ const Comment = ({
                     </CommentActions>
                 </CommentContentWrapper>
             </CommentWrapper>
-            {/* When a user clicks 'Reply' this shows the form */}
+            {/* When a user clicks 'Reply' this shows the Slate comment input */}
             {isReplying && (
                 <CreateComment
                     articleId={comment.articleId}
                     authorEmail={user?.email}
-                    onCreateComment={handleReply}
                     isReplying={isReplying}
                     replyingTo={replyingTo}
                     threadId={comment.id}
+                    setIsReplying={setIsReplying}
                 />
             )}
         </CommentContainer>
@@ -254,6 +385,46 @@ const CommentContentWrapper = styled.div`
         padding-bottom: 2px;
     }
 `
+const CommentContentContainer = styled.div`
+    &.editing {
+        margin-top: 16px;
+
+        .richTextEditor {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 8px;
+        }
+    }
+    .editActions {
+        font-size: 13px;
+
+        a {
+            color: #e50914;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    }
+    .editButton {
+        padding: 0;
+        height: 16px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        background: none;
+        border: none;
+        font-size: 13px;
+        color: #7a7a7a;
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #e9353b;
+        }
+        &.active {
+            color: #e9353b;
+        }
+    }
+`
 const CommentAuthor = styled.address`
     display: flex;
     align-items: center;
@@ -285,12 +456,42 @@ const CommentModerationButton = styled.button`
     color: #7a7a7a;
     border-radius: 4px;
     padding: 4px 8px;
+    position: relative;
     &:hover {
         cursor: pointer;
         color: #e9353b;
     }
     &.active {
         color: #e9353b;
+    }
+`
+
+const ModerationDropdownMenu = styled.div`
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #7a7a7a;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    min-width: 140px;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+    a,
+    button {
+        text-decoration: none;
+        background: none;
+        border: none;
+        color: #e9353b;
+        font-size: 14px;
+        padding: 4px 8px;
+        text-align: right;
+        &:hover {
+            background: #f7eaea;
+            cursor: pointer;
+        }
     }
 `
 const CommentActions = styled.div`
@@ -323,85 +524,3 @@ const CommentActions = styled.div`
         padding-right: 4px;
     }
 `
-
-export const renderRichText = (input: string): ReactNode[] => {
-    const paragraphs = input.split(/\n/) // Handle new lines as paragraph breaks
-
-    // Loops over each paragraph and renders it as a <p> element
-    return paragraphs.map((paragraph, index) => (
-        <p key={index}>{renderInlineElements(paragraph)}</p>
-    ))
-}
-
-// Define the inline rules for rendering rich text, converts inline markdown-like syntax to HTML elements
-const INLINE_RULES = [
-    {
-        regex: /\*\*(.+?)\*\*/, // Filters on **text** (used for bold)
-        render: (m: string, i: number) => <strong key={i}>{m}</strong>,
-    },
-    {
-        regex: /__(.+?)__/, // Filters on __text__ (used for italic)
-        render: (m: string, i: number) => <em key={i}>{m}</em>,
-    },
-    {
-        regex: /~~(.+?)~~/, // Filters on ~~text~~ (used for strikethrough)
-        render: (m: string, i: number) => <s key={i}>{m}</s>,
-    },
-    {
-        regex: /\+\+(.+?)\+\+/, // Filters on ++text++ (used for underline)
-        render: (m: string, i: number) => <u key={i}>{m}</u>,
-    },
-]
-
-type MatchRule = {
-    /** Starting index of the matched block  */
-    index: number
-    /** Length of the matched block */
-    length: number
-    /** Function that returns a ReactNode, used to render the matched text when invoked */
-    render: () => ReactNode
-}
-const renderInlineElements = (text: string): ReactNode[] => {
-    let elements: ReactNode[] = []
-    let remainingText = text
-    let i = 0
-
-    // While there is still text to process, find the earliest match of any inline rule
-    while (remainingText.length > 0) {
-        let earliestMatch: MatchRule | null = null
-
-        // Loop through each inline rule to find a matching pattern
-        for (const rule of INLINE_RULES) {
-            // Returns the first match of the current rule in the remaining text
-            const match = rule.regex.exec(remainingText)
-            if (
-                match &&
-                (earliestMatch === null || match.index < earliestMatch.index)
-            ) {
-                // If a match is found, create a MatchRule object with the index, length, and render function
-                earliestMatch = {
-                    index: match.index,
-                    length: match[0].length,
-                    render: () => rule.render(match[1]!, i++),
-                }
-            }
-        }
-
-        // Check if an earliest match was found, if so, push the text before the match and the rendered element to the elements array
-        if (earliestMatch) {
-            if (earliestMatch.index > 0) {
-                elements.push(remainingText.slice(0, earliestMatch.index))
-            }
-            elements.push(earliestMatch.render())
-            remainingText = remainingText.slice(
-                earliestMatch.index + earliestMatch.length,
-            )
-        } else {
-            // If no match was found, push the remaining text as a plain text element
-            elements.push(remainingText)
-            break
-        }
-    }
-
-    return elements
-}
