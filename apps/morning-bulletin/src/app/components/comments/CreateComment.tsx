@@ -5,9 +5,10 @@ import {
     usePostCommentMutation,
     usePostCommentReplyMutation,
 } from '../../utils/store/comment'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { RichTextInput } from './RichText'
 import { Descendant } from 'slate'
+import { CommentPending } from './CommentPending'
 
 interface CreateCommentProps {
     articleId: number
@@ -28,6 +29,7 @@ export const CreateComment = ({
 }: CreateCommentProps) => {
     const [createComment] = usePostCommentMutation()
     const [createReply] = usePostCommentReplyMutation()
+    const [showPendingModal, setShowPendingModal] = useState(false)
 
     const onSubmit = (data: Descendant[]) => {
         const accessToken = validateCookie('TOKEN')
@@ -52,8 +54,21 @@ export const CreateComment = ({
             createComment(comment)
         }
     }
+
+    useEffect(() => {
+        if (showPendingModal) {
+            const timer = setTimeout(() => {
+                setShowPendingModal(false)
+            }, 2000) // Hide after 3 seconds
+            return () => clearTimeout(timer)
+        }
+    }, [showPendingModal])
+
     return (
         <CreateCommentWrapper>
+            {showPendingModal && (
+                <CommentPending setIsVisible={setShowPendingModal} />
+            )}
             <RichTextInput
                 initialValue={[
                     {
