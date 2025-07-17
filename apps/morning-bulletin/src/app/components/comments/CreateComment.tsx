@@ -30,6 +30,7 @@ export const CreateComment = ({
     const [createComment] = usePostCommentMutation()
     const [createReply] = usePostCommentReplyMutation()
     const [showPendingModal, setShowPendingModal] = useState(false)
+    const [hasError, setHasError] = useState(false)
 
     const onSubmit = (data: Descendant[]) => {
         const accessToken = validateCookie('TOKEN')
@@ -43,7 +44,7 @@ export const CreateComment = ({
                 commentId: threadId,
                 authorEmail,
             }
-            createReply(reply)
+            createReply(reply).catch(() => setHasError(true))
             setIsReplying?.(false)
         } else {
             const comment: CreateCommentDto = {
@@ -51,7 +52,7 @@ export const CreateComment = ({
                 articleId,
                 authorEmail,
             }
-            createComment(comment)
+            createComment(comment).catch(() => setHasError(true))
         }
     }
 
@@ -59,7 +60,8 @@ export const CreateComment = ({
         if (showPendingModal) {
             const timer = setTimeout(() => {
                 setShowPendingModal(false)
-            }, 2000) // Hide after 3 seconds
+                setHasError(false)
+            }, 2000) // Hide after 2 seconds
             return () => clearTimeout(timer)
         }
     }, [showPendingModal])
@@ -67,7 +69,10 @@ export const CreateComment = ({
     return (
         <CreateCommentWrapper>
             {showPendingModal && (
-                <CommentPending setIsVisible={setShowPendingModal} />
+                <CommentPending
+                    setIsVisible={setShowPendingModal}
+                    isError={hasError}
+                />
             )}
             <RichTextInput
                 initialValue={[
