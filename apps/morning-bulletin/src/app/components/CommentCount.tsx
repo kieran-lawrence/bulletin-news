@@ -16,7 +16,7 @@ export const CommentCount = ({ articleId }: { articleId: number }) => {
     return (
         <CommentCountStyle>
             <BiCommentDetail />
-            {data.count > 0 && data.count}
+            {data.count ?? 0}
         </CommentCountStyle>
     )
 }
