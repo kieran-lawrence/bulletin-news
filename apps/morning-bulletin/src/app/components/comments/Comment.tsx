@@ -390,10 +390,11 @@ const CommentContentContainer = styled.div`
         margin-top: 16px;
 
         .richTextEditor {
-            padding: 8px 16px;
-            border: 1px solid #ccc;
+            flex: 1;
+            padding: 6px 12px;
             background: white;
-            border-radius: 8px;
+            border: 1px solid #6565659f;
+            border-radius: 4px;
         }
     }
     .editActions {
