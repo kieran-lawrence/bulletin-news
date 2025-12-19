@@ -67,6 +67,7 @@ export const BulletinButton = styled.button<{
         background: #c72a30;
     }
     transition: background 0.2s ease;
+    height: fit-content;
 `
 export const BulletinButtonAlt = styled.button<{
     $padding?: string

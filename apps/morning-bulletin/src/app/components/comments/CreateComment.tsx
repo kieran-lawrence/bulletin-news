@@ -1,90 +1,107 @@
-import { SubmitHandler, useForm } from 'react-hook-form'
 import styled from 'styled-components'
-import { BulletinButton, BulletTextInput } from '../../styles/shared'
 import { CreateCommentDto, CreateCommentReplyDto } from '../../utils/types'
 import { validateCookie } from '../../utils/helpers'
 import {
     usePostCommentMutation,
     usePostCommentReplyMutation,
 } from '../../utils/store/comment'
+import React, { useEffect, useState } from 'react'
+import { RichTextInput } from './RichText'
+import { Descendant } from 'slate'
+import { CommentPending } from './CommentPending'
 
-interface CreateCommentFormProps {
-    text: string
-}
 interface CreateCommentProps {
     articleId: number
-    onCreateComment: () => void
+    authorEmail?: string
     isReplying?: boolean
+    setIsReplying?: (isReplying: boolean) => void
     replyingTo?: string
     threadId?: number
 }
 
 export const CreateComment = ({
     articleId,
-    onCreateComment,
+    authorEmail,
+    setIsReplying,
     isReplying = false,
     replyingTo,
     threadId,
 }: CreateCommentProps) => {
-    const { register, handleSubmit, reset } = useForm<CreateCommentFormProps>()
-    const [createComment, { isLoading }] = usePostCommentMutation()
-    const [createReply, { isLoading: loadingReplies }] =
-        usePostCommentReplyMutation()
-    const onSubmit: SubmitHandler<CreateCommentFormProps> = (data) => {
-        const accessToken = validateCookie('TOKEN')
-        if (!accessToken) return
+    const [createComment] = usePostCommentMutation()
+    const [createReply] = usePostCommentReplyMutation()
+    const [showPendingModal, setShowPendingModal] = useState(false)
+    const [hasError, setHasError] = useState(false)
 
+    const onSubmit = (data: Descendant[]) => {
+        const accessToken = validateCookie('TOKEN')
+        if (!accessToken || !authorEmail) return
+
+        const parsedComment = JSON.stringify(data)
         if (isReplying && threadId) {
             const reply: CreateCommentReplyDto = {
-                text: data.text,
+                content: parsedComment,
                 articleId,
-                publishedAt: new Date().toISOString(),
-                accessToken,
-                threadId,
+                commentId: threadId,
+                authorEmail,
             }
-            createReply(reply).then(() => {
-                reset()
-                onCreateComment()
-            })
+            createReply(reply).catch(() => setHasError(true))
+
+            setShowPendingModal(true)
+            setTimeout(() => {
+                setIsReplying?.(false)
+            }, 2000)
         } else {
             const comment: CreateCommentDto = {
-                text: data.text,
+                content: parsedComment,
                 articleId,
-                publishedAt: new Date().toISOString(),
-                accessToken,
+                authorEmail,
             }
-            createComment(comment).then(() => {
-                reset()
-                onCreateComment()
-            })
+            createComment(comment).catch(() => setHasError(true))
+            setShowPendingModal(true)
         }
     }
+
+    useEffect(() => {
+        if (showPendingModal) {
+            const timer = setTimeout(() => {
+                setShowPendingModal(false)
+                setHasError(false)
+            }, 2000) // Hide after 2 seconds
+            return () => clearTimeout(timer)
+        }
+    }, [showPendingModal])
+
     return (
         <CreateCommentWrapper>
-            {isReplying && <span>Replying to {replyingTo}</span>}
-            <CreateCommentForm onSubmit={handleSubmit(onSubmit)}>
-                <BulletTextInput
-                    type="text"
-                    placeholder="Write a comment"
-                    $width="100%"
-                    {...register('text', { required: true })}
+            {showPendingModal && (
+                <CommentPending
+                    setIsVisible={setShowPendingModal}
+                    isError={hasError}
                 />
-                <BulletinButton type="submit">
-                    {isLoading || loadingReplies ? '...' : 'Send'}
-                </BulletinButton>
-            </CreateCommentForm>
+            )}
+            <RichTextInput
+                initialValue={[
+                    {
+                        type: 'paragraph',
+                        children: [{ text: '' }],
+                    },
+                ]}
+                readOnly={false}
+                showToolbar={true}
+                onSubmit={onSubmit}
+                replyingTo={replyingTo}
+                mode="comment"
+            />
         </CreateCommentWrapper>
     )
 }
 
-const CreateCommentForm = styled.form`
-    display: flex;
-    gap: 8px;
-`
-const CreateCommentWrapper = styled.div`
-    padding: 8px;
-
-    span {
+// Wrapper around the RichTextInput to apply styles
+export const CreateCommentWrapper = styled.div`
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    .replyingTo {
         background: #dfdfdf;
         width: max-content;
         display: block;
@@ -93,5 +110,12 @@ const CreateCommentWrapper = styled.div`
         border-top-right-radius: 5px;
         border-top-left-radius: 5px;
         box-sizing: border-box;
+    }
+    .editorContainer > .richTextEditor {
+        flex: 1;
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid #6565659f;
+        border-radius: 4px;
     }
 `

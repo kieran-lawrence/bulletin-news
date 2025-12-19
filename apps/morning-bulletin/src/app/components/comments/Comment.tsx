@@ -1,122 +1,337 @@
 import React, { useState } from 'react'
-import { Comment as CommentType, User } from '../../utils/types'
+import {
+    Comment as CommentType,
+    CreateCommentReplyDto,
+    User,
+} from '../../utils/types'
 import styled from 'styled-components'
 import { formatDistance } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
 import { userIsAdmin, userIsModerator } from '../../utils/helpers'
-import { FaReply, FaFlag, FaTrash } from 'react-icons/fa'
+import { FaReply, FaFlag, FaThumbsUp } from 'react-icons/fa'
 import { IconContext } from 'react-icons'
 import { CreateComment } from './CreateComment'
+import { getInitials, getShortenedName } from '../../utils/utils'
+import {
+    usePostCommentLikeMutation,
+    usePostCommentReplyMutation,
+    usePostCommentUpdateMutation,
+    usePostStatusUpdateMutation,
+} from '../../utils/store/comment'
+import { FaPencil } from 'react-icons/fa6'
+import { RichTextInput } from './RichText'
+import { Descendant } from 'slate'
 
 interface CommentsSectionProps {
     comments: CommentType[]
-    onCreateComment: () => void
+    refetchComments: () => void
 }
 interface CommentProps {
     comment: CommentType
     isFirstInThread?: boolean
     author: User
-    onCreateComment: () => void
+    refetchComments: () => void
 }
-type CommentAccumulator = {
-    [key: number]: CommentType[]
-}
+
+type ByParent = Record<number, CommentType[]>
 export const CommentsSection = ({
     comments,
-    onCreateComment,
+    refetchComments,
 }: CommentsSectionProps) => {
-    // Group the comments by their threadId
-    const groupedComments = groupCommentsByThread(comments)
+    // Record to hold comments grouped by parent ID
+    const byParent: ByParent = {}
 
-    // Map the grouped comments to Comment components
-    return Object.keys(groupedComments).map((threadId: string) =>
-        groupedComments[Number(threadId)].map((comment, commentIndex) => (
-            <Comment
-                key={comment.id}
-                comment={comment}
-                isFirstInThread={commentIndex !== 0}
-                author={groupedComments[Number(threadId)][0].user} // The author of the first comment in the thread is who we are replying to
-                onCreateComment={onCreateComment}
-            />
-        )),
-    )
+    // Iterate through comments and group them by parent ID
+    comments.forEach((comment) => {
+        // Use comment.parent.id if it exists, otherwise use 0 for top-level comments
+        const parentId = comment.parent?.id || 0
+        // Initialize the array for this parent ID if it doesn't exist
+        if (!byParent[parentId]) byParent[parentId] = []
+        // Push the comment into the appropriate parent ID array
+        byParent[parentId].push(comment)
+    })
+    // Recursivly render comments in a tree structure
+    const renderTree = (parentId: number = 0) => {
+        return (byParent[parentId] || []).map((comment) => (
+            <React.Fragment key={comment.id}>
+                <Comment
+                    comment={comment}
+                    isFirstInThread={!!comment.parent}
+                    author={comment.author}
+                    refetchComments={refetchComments}
+                />
+                {renderTree(comment.id)}
+            </React.Fragment>
+        ))
+    }
+    return <>{renderTree()}</>
 }
 
 const Comment = ({
     comment,
     isFirstInThread,
     author,
-    onCreateComment,
+    refetchComments,
 }: CommentProps) => {
     const { user } = useAuth()
-    const userInitials =
-        comment.user.firstName.substring(0, 1) +
-        comment.user.lastName.substring(0, 1)
+    const userInitials = getInitials(author.name)
     const [isReplying, setIsReplying] = useState(false)
-    const replyingTo = getShortenedName(author)
     const isAuthor = user?.email === author.email
+    const [hasLikedComment, setHasLikedComment] = useState(
+        () =>
+            comment.likes?.some((like) => like.user?.email === user?.email) ||
+            false,
+    )
+    const [hasReportedComment, setHasReportedComment] = useState(
+        () =>
+            comment.flags?.some((flag) => flag.user?.email === user?.email) ||
+            false,
+    )
+    const [isEditing, setIsEditing] = useState(false)
 
-    const handleReply = () => {
-        onCreateComment()
+    const [likeCount, setLikeCount] = useState(comment.likeCount)
+    const replyingTo = getShortenedName(comment.author)
+    const [likeComment] = usePostCommentLikeMutation()
+    const [updateCommentStatus] = usePostStatusUpdateMutation()
+    const [updateComment] = usePostCommentUpdateMutation()
+    const [createReply] = usePostCommentReplyMutation()
+
+    // Moderation dropdown state
+    const [showModerationMenu, setShowModerationMenu] = useState(false)
+
+    const handleReply = (textBlocks: Descendant[]) => {
+        const reply: CreateCommentReplyDto = {
+            content: JSON.stringify(textBlocks),
+            commentId: comment.id,
+            articleId: comment.articleId,
+            authorEmail: user?.email || '',
+        }
+        createReply(reply)
         setIsReplying(false)
     }
+    const handleCommentUpdate = (textBlocks: Descendant[]) => {
+        const content = JSON.stringify(textBlocks)
+        updateComment({
+            commentId: comment.id,
+            content,
+            email: user?.email || '',
+        }).then(() => {
+            setIsEditing(false)
+            setTimeout(() => {
+                refetchComments()
+            }, 1000)
+        })
+    }
+    const handleReport = () => {
+        if (hasReportedComment) {
+            return
+        }
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+        updateCommentStatus({
+            commentId: comment.id,
+            status: 'FLAGGED',
+            email: user.email, // We use email because bulletin doesn't use auth0 like the comments system does so we don't have a shared userid
+        }).then(() => {
+            setHasReportedComment(true)
+        })
+    }
+    const handleLike = () => {
+        if (hasLikedComment) {
+            return
+        }
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+        likeComment({
+            commentId: comment.id,
+            email: user.email,
+        }).then(() => {
+            setHasLikedComment(true)
+            setLikeCount((prev) => prev + 1)
+        })
+    }
+
+    // Moderation actions
+    const handleReject = () => {
+        if (!user) {
+            console.warn('User not logged in')
+            return
+        }
+
+        updateCommentStatus({
+            commentId: comment.id,
+            status: 'REJECTED',
+            email: user.email,
+        }).then(() => {
+            setTimeout(() => {
+                refetchComments()
+            }, 1000)
+        })
+        setShowModerationMenu(false)
+    }
+
+    // Close menu on click outside
+    React.useEffect(() => {
+        if (!showModerationMenu) return
+        const handleClick = (e: MouseEvent) => {
+            setShowModerationMenu(false)
+        }
+        document.addEventListener('click', handleClick)
+        return () => document.removeEventListener('click', handleClick)
+    }, [showModerationMenu])
 
     return (
         <CommentContainer>
             <CommentWrapper $hasAdditionalPadding={isFirstInThread}>
                 <CommentAvatar>{userInitials}</CommentAvatar>
                 <CommentContentWrapper>
-                    <CommentAuthor>
-                        {getShortenedName(comment.user)}
-                        <time dateTime={comment.publishedAt}>
-                            {formatDistance(
-                                new Date(comment.publishedAt),
-                                new Date(),
-                                { addSuffix: true },
+                    <div className="commentHeader">
+                        <CommentAuthor>
+                            {getShortenedName(comment.author)}
+                            {['ADMIN', 'MODERATOR'].includes(
+                                comment.author.role,
+                            ) && <span className="userRole">STAFF</span>}
+                            <time dateTime={comment.createdAt}>
+                                {formatDistance(
+                                    new Date(comment.createdAt),
+                                    new Date(),
+                                    { addSuffix: true },
+                                )}
+                            </time>
+                        </CommentAuthor>
+                        {user &&
+                            (userIsModerator(user) || userIsAdmin(user)) && (
+                                <div style={{ position: 'relative' }}>
+                                    <CommentModerationButton
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setShowModerationMenu((v) => !v)
+                                        }}
+                                        aria-haspopup="true"
+                                        aria-expanded={showModerationMenu}
+                                    >
+                                        Moderate
+                                    </CommentModerationButton>
+                                    {showModerationMenu && (
+                                        <ModerationDropdownMenu
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <button onClick={handleReject}>
+                                                Reject
+                                            </button>
+                                            {/* TODO: Update to use correct URL based on env */}
+                                            <a
+                                                href={`http://localhost:5173/moderate#commentCard-${comment.id}`}
+                                            >
+                                                View in Dashboard
+                                            </a>
+                                            {/* TODO: This anchor doesn't exist on the comments dashboard yet */}
+                                            <a
+                                                href={`http://localhost:5173/users#userCard-${comment.id}`}
+                                            >
+                                                Manage User
+                                            </a>
+                                        </ModerationDropdownMenu>
+                                    )}
+                                </div>
                             )}
-                        </time>
-                    </CommentAuthor>
-                    {isFirstInThread && (
+                    </div>
+                    {comment.parent && (
                         <span className="replyingTo">
-                            in reply to {replyingTo}
+                            in reply to{' '}
+                            {getShortenedName(comment.parent.author)}
                         </span>
                     )}
-                    {comment.text}
+                    <CommentContentContainer
+                        className={isEditing ? 'editing' : ''}
+                    >
+                        <>
+                            {/* This is the input that displays the users comment.  */}
+                            <RichTextInput
+                                onSubmit={
+                                    isEditing
+                                        ? handleCommentUpdate
+                                        : handleReply
+                                }
+                                readOnly={!isEditing}
+                                showToolbar={isEditing}
+                                initialValue={JSON.parse(comment.content)}
+                                mode="edit"
+                            />
+                            {isEditing ? (
+                                <small className="editActions">
+                                    <a
+                                        role="button"
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        cancel
+                                    </a>
+                                </small>
+                            ) : (
+                                isAuthor && (
+                                    <button
+                                        className="editButton"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <FaPencil />
+                                        Edit
+                                    </button>
+                                )
+                            )}
+                        </>
+                    </CommentContentContainer>
+                    {/* Contains the reply, report etc actions a user can take */}
                     <CommentActions>
                         <IconContext.Provider
                             value={{ className: 'commentActionIcons' }}
                         >
-                            {!isFirstInThread && !isAuthor && (
-                                <div
+                            {!isAuthor && (
+                                <button
                                     className="commentAction"
                                     onClick={() => setIsReplying(!isReplying)}
                                 >
                                     <FaReply />
                                     Reply
-                                </div>
+                                </button>
                             )}
-                            <div className="commentAction">
-                                <FaFlag /> Report
-                            </div>
-                            {user &&
-                                (userIsModerator(user) ||
-                                    userIsAdmin(user)) && (
-                                    <div className="commentAction">
-                                        <FaTrash />
-                                        Delete
-                                    </div>
-                                )}
+                            {!isAuthor && (
+                                <button
+                                    className={`commentAction ${
+                                        hasReportedComment && 'active'
+                                    }`}
+                                    onClick={handleReport}
+                                >
+                                    <FaFlag />{' '}
+                                    {hasReportedComment ? 'Reported' : 'Report'}
+                                </button>
+                            )}
+                            {!isAuthor && (
+                                <button
+                                    className={`commentAction ${
+                                        hasLikedComment && 'active'
+                                    }`}
+                                    onClick={handleLike}
+                                >
+                                    <FaThumbsUp /> Like {likeCount}
+                                </button>
+                            )}
                         </IconContext.Provider>
                     </CommentActions>
                 </CommentContentWrapper>
             </CommentWrapper>
+            {/* When a user clicks 'Reply' this shows the Slate comment input */}
             {isReplying && (
                 <CreateComment
-                    articleId={comment.article.id}
-                    onCreateComment={handleReply}
+                    articleId={comment.articleId}
+                    authorEmail={user?.email}
                     isReplying={isReplying}
                     replyingTo={replyingTo}
-                    threadId={comment.thread.id}
+                    threadId={comment.id}
+                    setIsReplying={setIsReplying}
                 />
             )}
         </CommentContainer>
@@ -128,7 +343,7 @@ const CommentContainer = styled.div`
     border-bottom: 1px solid #6565659f;
     padding: 16px 0;
 
-    &:last-child {
+    &:last-of-type {
         border-bottom: none;
     }
 `
@@ -138,7 +353,7 @@ const CommentWrapper = styled.div<{ $hasAdditionalPadding?: boolean }>`
     gap: 8px;
 
     padding: ${(props) =>
-        props.$hasAdditionalPadding ? '16px 64px' : '16px 0'};
+        props.$hasAdditionalPadding ? '16px 0 16px 32px' : '16px 0'};
 `
 const CommentAvatar = styled.div`
     width: 48px;
@@ -162,8 +377,58 @@ const CommentContentWrapper = styled.div`
         font-weight: 400;
         font-style: italic;
     }
+    .commentHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding-bottom: 2px;
+    }
+`
+const CommentContentContainer = styled.div`
+    &.editing {
+        margin-top: 16px;
+
+        .richTextEditor {
+            flex: 1;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #6565659f;
+            border-radius: 4px;
+        }
+    }
+    .editActions {
+        font-size: 13px;
+
+        a {
+            color: #e50914;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    }
+    .editButton {
+        padding: 0;
+        height: 16px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        background: none;
+        border: none;
+        font-size: 13px;
+        color: #7a7a7a;
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #e9353b;
+        }
+        &.active {
+            color: #e9353b;
+        }
+    }
 `
 const CommentAuthor = styled.address`
+    display: flex;
+    align-items: center;
     font-size: 18px;
     font-weight: 600;
     font-style: normal;
@@ -174,21 +439,84 @@ const CommentAuthor = styled.address`
         font-weight: 400;
         color: #7a7a7a;
     }
+    .userRole {
+        margin-left: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        font-weight: 400;
+        color: #7a7a7a;
+        border: 1px solid #7a7a7a;
+        border-radius: 4px;
+        padding: 1px 4px;
+    }
+`
+const CommentModerationButton = styled.button`
+    background: none;
+    border: 1px solid #7a7a7a;
+    font-size: 14px;
+    color: #7a7a7a;
+    border-radius: 4px;
+    padding: 4px 8px;
+    position: relative;
+    &:hover {
+        cursor: pointer;
+        color: #e9353b;
+    }
+    &.active {
+        color: #e9353b;
+    }
+`
+
+const ModerationDropdownMenu = styled.div`
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #7a7a7a;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    min-width: 140px;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+    a,
+    button {
+        text-decoration: none;
+        background: none;
+        border: none;
+        color: #e9353b;
+        font-size: 14px;
+        padding: 4px 8px;
+        text-align: right;
+        &:hover {
+            background: #f7eaea;
+            cursor: pointer;
+        }
+    }
 `
 const CommentActions = styled.div`
     display: flex;
-    justify-content: space-between;
+    flex: 1;
+    width: 100%;
     align-items: center;
+    gap: 16px;
     font-size: 15px;
     color: #7a7a7a;
-    width: 40%;
     padding-top: 8px;
     .commentAction {
         display: flex;
         align-items: center;
+        background: none;
+        border: none;
+        font-size: inherit;
+        color: inherit;
         &:hover {
             cursor: pointer;
             text-decoration: underline;
+            color: #e9353b;
+        }
+        &.active {
             color: #e9353b;
         }
     }
@@ -197,28 +525,3 @@ const CommentActions = styled.div`
         padding-right: 4px;
     }
 `
-
-/** Groups individual comments by their thread */
-const groupCommentsByThread = (comments: CommentType[]) => {
-    return comments.reduce(
-        (acc: CommentAccumulator, comment) => {
-            // Get the threadId from the comment
-            const threadId = comment.thread.id
-
-            // If the threadId is not already a key in the accumulator, create a new array
-            if (!acc[threadId]) {
-                acc[threadId] = []
-            }
-
-            // Add the comment to the array associated with the threadId
-            acc[threadId].push(comment)
-
-            // Return the grouped comments
-            return acc
-        },
-        {}, // Current value, (nothing)
-    )
-}
-const getShortenedName = (user: User): string => {
-    return `${user.firstName} ${user.lastName.substring(0, 1)}`
-}

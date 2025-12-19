@@ -63,6 +63,7 @@ export const FeaturedArticle = ({ articleId }: Props) => {
                         <ArticleCategoryReadTime
                             articleCategory={article.category}
                             articleReadTime={article.readTime}
+                            articleId={article.id}
                         />
                     </StyledArticleWrapper>
                 </StyledArticleLink>

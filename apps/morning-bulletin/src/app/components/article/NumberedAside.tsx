@@ -3,6 +3,7 @@ import { truncateArticleText } from '../../utils/helpers'
 import { Article } from '../../utils/types'
 import Link from 'next/link'
 import React from 'react'
+import { CommentCount } from '../CommentCount'
 
 interface NumberedAsideProps {
     articles: Article[]
@@ -28,6 +29,7 @@ export const NumberedAside = ({ articles, heading }: NumberedAsideProps) => {
                                     {article.category}
                                 </Link>{' '}
                                 • <small>{article.readTime} min read</small>
+                                <CommentCount articleId={article.id} />
                             </TrendingArticleCategory>
                         </ArticleList>
                     </React.Fragment>

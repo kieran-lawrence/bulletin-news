@@ -54,6 +54,7 @@ export const LatestNews = () => {
                                 articleCategory={article.category}
                                 articleReadTime={article.readTime}
                                 fontSize="11px"
+                                articleId={article.id}
                             />
                         </StyledLatestNewsLink>
                     ))}
