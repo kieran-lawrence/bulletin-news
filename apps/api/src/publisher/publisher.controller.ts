@@ -1,0 +1,36 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { Routes, Services } from '../util/constants';
+import { IPublisherService } from './publisher';
+import { PaginationQueryParamsDto, Publisher } from '@repo/api';
+
+@Controller(Routes.PUBLISHER)
+export class PublisherController {
+  constructor(
+    @Inject(Services.PUBLISHER)
+    private readonly publisherService: IPublisherService,
+  ) {}
+  @Get()
+  findAll(@Query() { page = '1', page_size = '10' }: PaginationQueryParamsDto) {
+    return this.publisherService.findAll({
+      page: parseInt(page),
+      page_size: parseInt(page_size),
+    });
+  }
+  @Get(':id')
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.publisherService.findById(id);
+  }
+  @Post()
+  createPublisher(@Body() publisher: Publisher) {
+    return this.publisherService.insertPublisher(publisher);
+  }
+}
