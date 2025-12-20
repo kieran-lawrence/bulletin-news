@@ -31,7 +31,7 @@ SALT=value_goes_here
 Great, now you've done that, you can run the following command from the project root directory
 
 ```sh
-yarn start:dev
+yarn dev
 ```
 
 To view the frontend, go to `http://localhost:3000`
@@ -43,63 +43,3 @@ To view the frontend, go to `http://localhost:3000`
     > Now you have access to moderate comments and create content for the site!
 3.  Now, create a publisher from [this page](http://localhost:3000/admin/publisher/create)
 4.  Lastly, lets create an article, go to [this page](http://localhost:3000/admin/article/create)
-    - Use the below building blocks to add content to an article via the articleSections text input found on the form.
-
-        > Notes:
-        >
-        > - The `intention` block kind array is optional, so you don't have to include it
-        > - All `articleSections` are used in the example to show what is valid content, but you can use as many or as little as you like
-
-        ```json
-        // General text
-        {
-            "kind": "text",
-            "text": "The article text would go here"
-        },
-        // Text with intentions (i.e. bold or italic)
-        {
-            "kind": "text",
-            "text": "More text, this time with bold, and italics",
-            "intentions": [
-                {
-                    "kind": "emphasized",
-                    "index": 36,
-                    "length": 7
-                },
-                {
-                    "kind": "important",
-                    "index": 26,
-                    "length": 4
-                }
-            ]
-        },
-        // Headings
-        {
-            "kind": "heading",
-            "text": "This is a heading!"
-        },
-        // Pull quotes
-        {
-            "kind": "quote",
-            "text": "I'm pickle rick!!!!",
-            "attribution": "Rick Sanchez"
-        },
-        // Inline images
-        {
-            "kind": "image",
-            "url": "an-image-url.webp",
-            "text": "This is a caption",
-            "intentions": [
-                {
-                    "kind": "emphasized",
-                    "index": 0,
-                    "length": 4
-                },
-                {
-                    "kind": "important",
-                    "index": 10,
-                    "length": 7
-                }
-            ]
-        }
-        ```

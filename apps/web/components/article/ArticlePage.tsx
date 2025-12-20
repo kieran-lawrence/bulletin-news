@@ -3,7 +3,7 @@ import {
     useGetArticleByIdQuery,
     useGetArticlesByFlagQuery,
 } from '../../utils/store/article'
-import { formatArticleSections } from '../../utils/helpers'
+import { formatArticleBlock, formatArticleSections } from '../../utils/helpers'
 import styled from 'styled-components'
 import { MdBookmarkAdd } from 'react-icons/md'
 import { BsThreeDots } from 'react-icons/bs'
@@ -44,13 +44,15 @@ export const ArticlePage = ({ id }: ArticleProps) => {
                     </ArticleTitleContainer>
                     <ArticleBylineContainer>
                         <ArticleByLine>
-                            <Image
-                                className="articlePublisherLogo"
-                                src={article.publisher.logoUrl}
-                                alt={article.publisher.name}
-                                width={28}
-                                height={28}
-                            />
+                            {article.publisher.logoUrl && (
+                                <Image
+                                    className="articlePublisherLogo"
+                                    src={article.publisher.logoUrl}
+                                    alt={article.publisher.name}
+                                    width={28}
+                                    height={28}
+                                />
+                            )}
                             {article.publisher.name} by {article.author} •{' '}
                             {format(
                                 new Date(article.publishedAt),
@@ -70,13 +72,7 @@ export const ArticlePage = ({ id }: ArticleProps) => {
                             <StyledArticle>
                                 {article &&
                                     article.articleSections &&
-                                    article.articleSections.map(
-                                        (section, index) =>
-                                            formatArticleSections(
-                                                section,
-                                                index,
-                                            ),
-                                    )}
+                                    formatArticleBlock(article.articleSections)}
                             </StyledArticle>
                             <CommentsContainer articleId={article.id} />
                         </StyledArticleCommentsWrap>

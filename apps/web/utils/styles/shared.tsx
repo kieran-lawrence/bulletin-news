@@ -131,3 +131,10 @@ export const FullScreenLoaderWrapper = styled.div`
     width: 100vw;
     background: #00000014;
 `
+export const StyledBlockQuote = styled.blockquote`
+    border-left: 4px solid #e50914;
+    padding-left: 16px;
+    color: #555;
+    margin: 8px 0 4px 8px;
+    font-style: italic;
+`

@@ -1934,6 +1934,7 @@ __metadata:
     "@repo/eslint-config": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.10.7"
+    "@types/slate": "npm:^0.47.16"
     class-validator: "npm:^0.14.3"
     ts-loader: "npm:^9.4.3"
     ts-node: "npm:^10.9.2"
@@ -2368,6 +2369,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:*":
+  version: 19.2.7
+  resolution: "@types/react@npm:19.2.7"
+  dependencies:
+    csstype: "npm:^3.2.2"
+  checksum: 10c0/a7b75f1f9fcb34badd6f84098be5e35a0aeca614bc91f93d2698664c0b2ba5ad128422bd470ada598238cebe4f9e604a752aead7dc6f5a92261d0c7f9b27cfd1
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:19.1.0":
   version: 19.1.0
   resolution: "@types/react@npm:19.1.0"
@@ -2404,6 +2414,16 @@ __metadata:
     "@types/node": "npm:*"
     "@types/send": "npm:<1"
   checksum: 10c0/842fca14c9e80468f89b6cea361773f2dcd685d4616a9f59013b55e1e83f536e4c93d6d8e3ba5072d40c4e7e64085210edd6646b15d538ded94512940a23021f
+  languageName: node
+  linkType: hard
+
+"@types/slate@npm:^0.47.16":
+  version: 0.47.16
+  resolution: "@types/slate@npm:0.47.16"
+  dependencies:
+    "@types/react": "npm:*"
+    immutable: "npm:^3.8.2"
+  checksum: 10c0/2964190712b24f1758801d0e838d20ed085e821b414b8f8a5ad2d6efc4ce2f218f39d9a23a40669ff6a8c6c6f27cb502f4ac0d1db13061adc9b47b32d7370da2
   languageName: node
   linkType: hard
 
@@ -3924,7 +3944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:^3.0.2":
+"csstype@npm:^3.0.2, csstype@npm:^3.2.2":
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
   checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
@@ -5431,6 +5451,13 @@ __metadata:
   version: 11.0.1
   resolution: "immer@npm:11.0.1"
   checksum: 10c0/d505c1aa6d5d7ff03196e0a508af2853839eb1a3d5af51d55ca5815c46981b74765faf357fbd276b151109b07dd6b564077be92b0247b0a4effa78130166030d
+  languageName: node
+  linkType: hard
+
+"immutable@npm:^3.8.2":
+  version: 3.8.2
+  resolution: "immutable@npm:3.8.2"
+  checksum: 10c0/fb6a2999ad3bda9e51741721e42547076dd492635ee4df9241224055fe953ec843583a700088cc4915f23dc326e5084f4e17f1bbd7388c3e872ef5a242e0ac5e
   languageName: node
   linkType: hard
 

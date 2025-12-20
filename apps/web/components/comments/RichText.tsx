@@ -22,7 +22,13 @@ import {
     useSlate,
     withReact,
 } from 'slate-react'
-import { CustomEditor, CustomElementType, CustomTextKey } from './custom-types'
+import {
+    CustomEditor,
+    CustomElementType,
+    CustomTextKey,
+    ImageElement,
+    ParagraphElement,
+} from './custom-types'
 import styled from 'styled-components'
 import {
     FaBold,
@@ -30,9 +36,10 @@ import {
     FaUnderline,
     FaQuoteLeft,
     FaList,
+    FaCamera,
 } from 'react-icons/fa'
 import isHotkey from 'is-hotkey'
-import { BulletinButton } from '../../utils/styles/shared'
+import { BulletinButton, StyledBlockQuote } from '../../utils/styles/shared'
 
 export const RichTextInput = ({
     initialValue,
@@ -41,6 +48,8 @@ export const RichTextInput = ({
     onSubmit,
     replyingTo,
     mode,
+    buttonText = 'Submit',
+    placeholder = 'Write a comment...',
 }: {
     initialValue: Descendant[]
     readOnly?: boolean
@@ -48,6 +57,8 @@ export const RichTextInput = ({
     onSubmit: (values: Descendant[]) => void
     replyingTo?: string
     mode: 'comment' | 'edit'
+    buttonText?: string
+    placeholder?: string
 }) => {
     const [value, setValue] = React.useState<Descendant[]>(initialValue)
     const renderElement = useCallback(
@@ -81,6 +92,7 @@ export const RichTextInput = ({
                     <MarkButton format="underline" icon={<FaUnderline />} />
                     <BlockButton format="block-quote" icon={<FaQuoteLeft />} />
                     <BlockButton format="bulleted-list" icon={<FaList />} />
+                    <BlockButton format="image" icon={<FaCamera />} />
                 </Toolbar>
             )}
             {replyingTo && (
@@ -91,7 +103,7 @@ export const RichTextInput = ({
                     className="richTextEditor"
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
-                    placeholder="Write a comment..."
+                    placeholder={placeholder}
                     renderPlaceholder={({ children, attributes }) => (
                         <span
                             {...attributes}
@@ -156,7 +168,7 @@ export const RichTextInput = ({
                             }
                         }}
                     >
-                        Submit
+                        {buttonText}
                     </BulletinButton>
                 )}
             </StyledEditorContainer>
@@ -174,6 +186,17 @@ const Element = ({ attributes, children, element }: RenderElementProps) => {
             return <ul {...attributes}>{children}</ul>
         case 'list-item':
             return <li {...attributes}>{children}</li>
+        case 'image':
+            return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    {...attributes}
+                    src={element.url}
+                    alt="Rich Text Editor Image"
+                    style={{ maxWidth: '100%' }}
+                />
+            )
+        case 'paragraph':
         default:
             return <p {...attributes}>{children}</p>
     }
@@ -202,12 +225,48 @@ interface BlockButtonProps {
 
 const BlockButton = ({ format, icon }: BlockButtonProps) => {
     const editor = useSlate()
+    const handleMouseDown = (event: MouseEvent<HTMLSpanElement>) => {
+        event.preventDefault()
+        if (format === 'image') {
+            const url = window.prompt('Enter the image URL:')
+            if (url) {
+                // Insert the image at the current selection
+                const image: ImageElement = {
+                    type: 'image',
+                    url,
+                    children: [{ text: '' }],
+                }
+                Transforms.insertNodes(editor, image)
+                // Insert a new paragraph after the image so the user can continue typing
+                const paragraph: ParagraphElement = {
+                    type: 'paragraph',
+                    children: [{ text: '' }],
+                }
+                Transforms.insertNodes(editor, paragraph)
+                // Move selection to the new paragraph
+                const { selection } = editor
+                if (selection) {
+                    const [currentNode] = Editor.nodes(editor, {
+                        at: selection,
+                        match: (n) =>
+                            SlateElement.isElement(n) && n.type === 'image',
+                    })
+                    if (currentNode) {
+                        const [, path] = currentNode
+                        if (path && typeof path[0] === 'number') {
+                            const nextPath = [path[0] + 1, 0]
+                            Transforms.select(editor, nextPath)
+                        }
+                    }
+                }
+            }
+        } else {
+            toggleBlock(editor, format)
+        }
+    }
     return (
         <button
-            onMouseDown={(event: MouseEvent<HTMLSpanElement>) => {
-                event.preventDefault()
-                toggleBlock(editor, format)
-            }}
+            onMouseDown={handleMouseDown}
             className={isBlockActive(editor, format) ? 'active' : ''}
         >
             {icon}
@@ -242,6 +301,7 @@ export const Toolbar = ({ children }: PropsWithChildren<{}>) => {
 const toggleBlock = (editor: CustomEditor, format: CustomElementType) => {
     const isActive = isBlockActive(editor, format)
     const isList = format === 'bulleted-list'
+    const isImage = format === 'image'
 
     Transforms.unwrapNodes(editor, {
         match: (n) =>
@@ -250,9 +310,14 @@ const toggleBlock = (editor: CustomEditor, format: CustomElementType) => {
             n.type === 'bulleted-list',
         split: true,
     })
-    let newProperties: Partial<SlateElement>
-    newProperties = {
-        type: isActive ? 'paragraph' : isList ? 'list-item' : format,
+    const newProperties: Partial<SlateElement> = {
+        type: isActive
+            ? 'paragraph'
+            : isList
+              ? 'list-item'
+              : isImage
+                ? 'image'
+                : format,
     }
     Transforms.setNodes<SlateElement>(editor, newProperties)
 
@@ -318,13 +383,6 @@ const StyledToolbar = styled.div`
             background: white;
         }
     }
-`
-const StyledBlockQuote = styled.blockquote`
-    border-left: 4px solid #e50914;
-    padding-left: 16px;
-    color: #555;
-    margin: 8px 0 4px 8px;
-    font-style: italic;
 `
 const StyledEditorContainer = styled.div`
     box-sizing: border-box;

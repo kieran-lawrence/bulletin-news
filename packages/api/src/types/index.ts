@@ -1,3 +1,5 @@
+import { Descendant } from 'slate'
+
 interface ArticleSections {
     kind: string
 }
@@ -59,7 +61,7 @@ export type Article = {
     urlToImage: string
     publishedAt: string
     flags: string[]
-    articleSections: ArticleSection[]
+    articleSections: Descendant[]
     publisher: Publisher
 }
 

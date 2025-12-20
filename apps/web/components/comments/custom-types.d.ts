@@ -19,11 +19,18 @@ export type ParagraphElement = {
     children: Descendant[]
 }
 
+export type ImageElement = {
+    type: 'image'
+    url: string
+    children: Descendant[]
+}
+
 type CustomElement =
     | BlockQuoteElement
     | BulletedListElement
     | ListItemElement
     | ParagraphElement
+    | ImageElement
 
 export type CustomElementType = CustomElement['type']
 

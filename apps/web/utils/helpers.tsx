@@ -5,9 +5,12 @@ import {
     ArticleSectionImageStyle,
     ArticleSectionStyle,
     QuoteContainerStyle,
+    StyledBlockQuote,
 } from '../utils/styles/shared'
 import { jwtDecode, JwtPayload } from 'jwt-decode'
 import React from 'react'
+import { Descendant } from 'slate'
+import { RenderLeafProps } from 'slate-react'
 
 /**
  * Returns a relative date based on the difference between the current date and the provided date
@@ -68,6 +71,97 @@ const formatIntentionKind = (
             return <>{text?.slice(intention.index, splitEnd)}</>
         }
     }
+}
+export const formatArticleBlock = (blocks: Descendant[]): React.ReactNode[] => {
+    // Helper to render a text node with marks
+    const renderLeaf = (
+        leaf: RenderLeafProps['leaf'],
+        key: number,
+    ): React.ReactNode => {
+        let el: React.ReactNode = leaf.text
+        if (leaf.bold) el = <strong>{el}</strong>
+        if (leaf.italic) el = <em>{el}</em>
+        if (leaf.underline) el = <u>{el}</u>
+        return <React.Fragment key={key}>{el}</React.Fragment>
+    }
+
+    const renderBlock = (block: Descendant, i: number): React.ReactNode => {
+        if ('type' in block) {
+            switch (block.type) {
+                case 'block-quote':
+                    return (
+                        <StyledBlockQuote key={i}>
+                            {Array.isArray(block.children) &&
+                                block.children.map((child, idx) =>
+                                    'text' in child
+                                        ? renderLeaf(child, idx)
+                                        : null,
+                                )}
+                        </StyledBlockQuote>
+                    )
+                case 'bulleted-list':
+                    return (
+                        <ul key={i}>
+                            {Array.isArray(block.children) &&
+                                block.children.map((li, idx) =>
+                                    'children' in li &&
+                                    Array.isArray(li.children) ? (
+                                        <li key={idx}>
+                                            {li.children.map((child, k) =>
+                                                'text' in child
+                                                    ? renderLeaf(child, k)
+                                                    : null,
+                                            )}
+                                        </li>
+                                    ) : null,
+                                )}
+                        </ul>
+                    )
+                case 'list-item':
+                    return (
+                        <li key={i}>
+                            {Array.isArray(block.children) &&
+                                block.children.map((child, idx) =>
+                                    'text' in child
+                                        ? renderLeaf(child, idx)
+                                        : null,
+                                )}
+                        </li>
+                    )
+                case 'image':
+                    return (
+                        <div
+                            key={i}
+                            style={{ textAlign: 'center', margin: '1em 0' }}
+                        >
+                            <img
+                                src={(block as any).url}
+                                alt=""
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: 400,
+                                    borderRadius: 8,
+                                }}
+                            />
+                        </div>
+                    )
+                case 'paragraph':
+                default:
+                    return (
+                        <p key={i}>
+                            {Array.isArray(block.children) &&
+                                block.children.map((child, idx) =>
+                                    'text' in child
+                                        ? renderLeaf(child, idx)
+                                        : null,
+                                )}
+                        </p>
+                    )
+            }
+        }
+        return null
+    }
+    return blocks.map(renderBlock).filter(Boolean)
 }
 const formatIntention = (intentions: Intention[], text: string) => {
     const int = [...intentions]

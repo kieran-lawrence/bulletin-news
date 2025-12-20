@@ -1,15 +1,15 @@
 'use client'
 
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { type ArticleSection } from '@repo/api'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { PiSealWarningBold, PiInfo } from 'react-icons/pi'
 import { HeaderLogo } from '../../../../components/HeaderLogo'
-import { BulletinButton } from '../../../../utils/styles/shared'
 import { CreateArticleProps } from '../../../../utils/types'
 import { usePostArticleMutation } from '../../../../utils/store/article'
 import { useRouter } from 'next/navigation'
+import { RichTextInput } from '../../../../components/comments/RichText'
+import { Descendant } from 'slate'
 
 interface Message {
     visible: boolean
@@ -17,26 +17,19 @@ interface Message {
     type: 'success' | 'error'
 }
 
-type ArticleFormData = Omit<CreateArticleProps, 'articleSections'> & {
-    articleSections: string // JSON string input
-}
+type ArticleFormData = Omit<CreateArticleProps, 'articleSections'>
 
 export default function CreateArticle() {
     const [handleArticleCreation, { isLoading }] = usePostArticleMutation()
     const { register, handleSubmit } = useForm<ArticleFormData>()
     const [message, setMessage] = useState<Message>()
     const router = useRouter()
-
-    // Helper to parse article sections from JSON string
-    function parseSections(input: string): ArticleSection[] {
-        try {
-            const parsed = JSON.parse(input)
-            if (Array.isArray(parsed)) return parsed
-            return []
-        } catch {
-            return []
-        }
-    }
+    const [articleBlocks, setArticleBlocks] = useState<Descendant[]>([
+        {
+            type: 'paragraph',
+            children: [{ text: '' }],
+        },
+    ])
 
     const onSubmit: SubmitHandler<ArticleFormData> = (data) => {
         // Flags as dropdown (single value or blank)
@@ -50,7 +43,7 @@ export default function CreateArticle() {
             flags,
             readTime: Number(data.readTime),
             publisherId: Number(data.publisherId),
-            articleSections: parseSections(data.articleSections),
+            articleSections: articleBlocks,
         }
 
         handleArticleCreation(formData)
@@ -87,24 +80,37 @@ export default function CreateArticle() {
                 <h2>Complete the form below to create a new article.</h2>
                 {message && message.visible && getFormattedMessage(message)}
                 <CreateArticleForm onSubmit={handleSubmit(onSubmit)}>
-                    <Input
-                        id="authorInput"
-                        type="text"
-                        placeholder="Author Name"
-                        {...register('author', { required: true })}
-                    />
-                    <Input
-                        id="titleInput"
-                        type="text"
-                        placeholder="Title"
-                        {...register('title', { required: true })}
-                    />
-                    <Input
-                        id="categoryInput"
-                        type="text"
-                        placeholder="Category"
-                        {...register('category', { required: true })}
-                    />
+                    <HorizontalInputsWrapper>
+                        <Input
+                            id="authorInput"
+                            type="text"
+                            placeholder="Author Name"
+                            {...register('author', { required: true })}
+                        />
+                        <Input
+                            id="titleInput"
+                            type="text"
+                            placeholder="Title"
+                            {...register('title', { required: true })}
+                        />
+                    </HorizontalInputsWrapper>
+                    <HorizontalInputsWrapper>
+                        <Input
+                            id="categoryInput"
+                            type="text"
+                            placeholder="Category"
+                            {...register('category', { required: true })}
+                        />
+                        <Input
+                            id="publisherIdInput"
+                            type="number"
+                            placeholder="Publisher ID"
+                            {...register('publisherId', {
+                                required: true,
+                                valueAsNumber: true,
+                            })}
+                        />
+                    </HorizontalInputsWrapper>
                     <Input
                         id="readTimeInput"
                         type="number"
@@ -124,45 +130,25 @@ export default function CreateArticle() {
                         defaultValue={new Date().toISOString().split('T')[0]}
                         {...register('publishedAt', { required: true })}
                     />
-                    <Input
-                        id="publisherIdInput"
-                        type="number"
-                        placeholder="Publisher ID"
-                        {...register('publisherId', {
-                            required: true,
-                            valueAsNumber: true,
-                        })}
-                    />
                     <FlagLabel>
                         Flags
-                        <FlagSelect multiple {...register('flags')} size={4}>
+                        <FlagSelect multiple {...register('flags')} size={3}>
                             <option value="must-read">Must Read</option>
                             <option value="trending">Trending</option>
                             <option value="editors-pick">Editors Pick</option>
                         </FlagSelect>
                     </FlagLabel>
-                    <textarea
-                        id="articleSectionsInput"
-                        required
-                        placeholder='Article Sections (JSON array, e.g. [{"kind":"text","text":"Hello world"}])'
-                        style={{
-                            fontSize: 16,
-                            padding: '16px 32px',
-                            borderRadius: 4,
-                            border: '1px solid #ccc',
-                            minHeight: 80,
-                        }}
-                        {...register('articleSections')}
-                    />
-                    <BulletinButton
-                        type="submit"
-                        disabled={isLoading}
-                        $fontSize="18px"
-                        $fontWeight={700}
-                        $padding="16px 32px"
-                    >
-                        {isLoading ? 'Loading...' : 'Create'}
-                    </BulletinButton>
+                    <ArticleContentContainer>
+                        <RichTextInput
+                            onSubmit={setArticleBlocks}
+                            initialValue={articleBlocks}
+                            showToolbar={true}
+                            readOnly={isLoading}
+                            buttonText={isLoading ? 'Loading...' : 'Create'}
+                            placeholder={'Add some content to this article!'}
+                            mode="comment"
+                        />
+                    </ArticleContentContainer>
                 </CreateArticleForm>
             </div>
         </CreateArticlePage>
@@ -211,6 +197,7 @@ const CreateArticleForm = styled.form`
     gap: 16px;
     padding: 16px;
     box-sizing: border-box;
+    overflow: scroll;
 `
 const Input = styled.input<{ $width?: string }>`
     font-size: 16px;
@@ -245,6 +232,19 @@ const ErrorMessage = styled.div`
     padding-top: 16px;
 `
 
+export const ArticleContentContainer = styled.div`
+    .editorContainer {
+        flex-direction: column;
+    }
+    .richTextEditor {
+        flex: 1;
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid #6565659f;
+        border-radius: 4px;
+    }
+`
+
 const FlagLabel = styled.label`
     font-weight: 600;
     margin-top: 8px;
@@ -255,10 +255,9 @@ const FlagLabel = styled.label`
 
 const FlagSelect = styled.select`
     font-size: 16px;
-    padding: 16px 32px;
+    padding: 8px 16px;
     border-radius: 4px;
     border: 1px solid #ccc;
-    margin-top: 4px;
     background: #f5f5f5;
     box-sizing: border-box;
     outline: none;
@@ -266,4 +265,9 @@ const FlagSelect = styled.select`
     &:active {
         border: 1px solid #e9353b;
     }
+`
+
+const HorizontalInputsWrapper = styled.div`
+    display: flex;
+    gap: 16px;
 `
